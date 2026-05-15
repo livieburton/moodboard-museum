@@ -3,7 +3,7 @@ import ThemePicker from '../components/ThemePicker';
 import ArtworkCard from '../components/ArtworkCard';
 import { listThemes, queryTheme, searchFreeText } from '../api';
 
-export default function SearchView() {
+export default function SearchView({ onAddToMoodboard, moodboard = [] }) {
   const [themes, setThemes] = useState([]);
   const [activeSlug, setActiveSlug] = useState(null);
   const [results, setResults] = useState(null);
@@ -94,7 +94,12 @@ export default function SearchView() {
           ) : (
             <div className="results-grid">
               {results.map((artwork) => (
-                <ArtworkCard key={artwork.object_id} artwork={artwork} />
+                <ArtworkCard
+                    key={artwork.object_id}
+                    artwork={artwork}
+                    onAdd={onAddToMoodboard}
+                    isAdded={moodboard.some((a) => a.object_id === artwork.object_id)}
+                  />
               ))}
             </div>
           )}
