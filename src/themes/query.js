@@ -8,7 +8,14 @@
  */
 
 const { openDb } = require('../pipeline/db');
-const { validateRecipe } = require('./theme-recipe');
+const { validateRecipe, GLOBAL_EXCLUDE_TAGS } = require('./theme-recipe');
+
+// Objects excluded from all results regardless of recipe or tags.
+// Used for works whose subject matter is inappropriate for a moodboard
+// context but cannot be caught by tag filtering alone.
+const BLOCKED_OBJECT_IDS = [
+  11116,  // "Dressing for the Carnival" — Winslow Homer; depicts Black Americans in a way that reads as slavery imagery without context
+];
 
 const DEFAULT_LIMIT = 50;
 
@@ -57,6 +64,9 @@ function buildQuery(filters, limit) {
   const params = [];
   // Always enforced — belt-and-suspenders on top of the ingest-time guarantee.
   const conditions = ['o.is_public_domain = 1', 'o.primary_image IS NOT NULL'];
+  if (BLOCKED_OBJECT_IDS.length > 0) {
+    conditions.push(`o.object_id NOT IN (${BLOCKED_OBJECT_IDS.join(', ')})`);
+  }
   let tagMatchJoin = '';
 
   // Tag matching: a subquery counts how many recipe tags each object carries.
@@ -75,17 +85,22 @@ function buildQuery(filters, limit) {
   }
 
   // Exclude any object that carries at least one excluded tag.
-  if (filters.excludeTags && filters.excludeTags.length > 0) {
-    const phs = filters.excludeTags.map(() => '?').join(', ');
+  // Global excludes are merged with recipe-level excludes and deduplicated.
+  const allExcludes = [
+    ...GLOBAL_EXCLUDE_TAGS,
+    ...(filters.excludeTags || []),
+  ].filter((tag, i, arr) => arr.indexOf(tag) === i);
+  if (allExcludes.length > 0) {
+    const phs = allExcludes.map(() => '?').join(', ');
     conditions.push(
       `o.object_id NOT IN (SELECT object_id FROM object_tags WHERE tag IN (${phs}))`
     );
-    params.push(...filters.excludeTags);
+    params.push(...allExcludes);
   }
 
   if (filters.classifications) {
     const phs = filters.classifications.map(() => '?').join(', ');
-    conditions.push(`o.classification IN (${phs})`);
+    conditions.push(`(o.classification IN (${phs}) OR o.classification IS NULL)`);
     params.push(...filters.classifications);
   }
 

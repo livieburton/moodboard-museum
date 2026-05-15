@@ -20,7 +20,7 @@ const { DB_PATH }              = require('./db');
 const { readCache, writeCache } = require('./enrich-images');
 const { fetchObject }           = require('./met-api');
 
-const CACHE_DIR    = path.join(__dirname, '..', '..', 'data', 'cache', 'met-objects');
+const CACHE_DIR    = path.join('C:\\Users\\livie\\AppData\\Local\\moodboard-museum-cache');
 const MET_API_BASE = 'https://collectionapi.metmuseum.org/public/collection/v1';
 const NEW_DB_PATH  = path.join(path.dirname(DB_PATH), 'moodboard-new.sqlite');
 const TEST_DB_PATH = path.join(path.dirname(DB_PATH), 'moodboard-test.sqlite');

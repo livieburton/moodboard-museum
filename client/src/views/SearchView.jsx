@@ -88,8 +88,7 @@ export default function SearchView({ onAddToMoodboard, moodboard = [] }) {
           {matchReason && <p className="match-reason-bar">{matchReason}</p>}
           {results.length === 0 ? (
             <p className="state-message">
-              No results in the sample data — these filters will light up once
-              you load the full Met dataset.
+              No matching artworks with images yet — check back as the collection grows.
             </p>
           ) : (
             <div className="results-grid">

@@ -35,6 +35,10 @@ export default function App() {
         </button>
       </header>
       <SearchView onAddToMoodboard={handleAdd} moodboard={moodboard} />
+      <footer className="app-footer">
+        Moodboard Museum is designed for aesthetic inspiration, not historical research. The Met&rsquo;s collection spans 5,000 years of human history — and a vibe-based search tool has a responsibility to think carefully about what it surfaces and in what context. For historical research or the full breadth of the collection, visit{' '}
+        <a href="https://metmuseum.org" target="_blank" rel="noopener noreferrer">metmuseum.org</a> directly.
+      </footer>
       <MoodboardPanel
         artworks={moodboard}
         onRemove={handleRemove}

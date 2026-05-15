@@ -9,8 +9,9 @@
  * Usage:
  *   node src/pipeline/enrich-images.js [--limit N]
  *
- *   --limit N   only enrich N objects this run (default: all). Useful for
- *               testing, or for chipping away at a big dataset in sessions.
+ *   --limit N      only enrich N objects this run (default: all).
+ *   --clear-cache  delete null-sentinel cache files before running, so
+ *                  previously-blocked objects get a fresh attempt.
  *
  * Only objects in ENRICH_DEPARTMENTS are enriched. European Paintings is
  * excluded entirely — the Met restricts those image files and returns 403s.
@@ -33,7 +34,7 @@ const path = require('path');
 const { openDb, saveDb } = require('./db');
 const { fetchObject, extractImageUrls } = require('./met-api');
 
-const CACHE_DIR = path.join(__dirname, '..', '..', 'data', 'cache', 'met-objects');
+const CACHE_DIR = path.join('C:\\Users\\livie\\AppData\\Local\\moodboard-museum-cache');
 
 const ENRICH_DEPARTMENTS = [
   'Drawings and Prints',
@@ -89,6 +90,28 @@ function writeCache(objectId, apiRecord) {
   fs.renameSync(tempPath, finalPath);
 }
 
+// --- cache maintenance -----------------------------------------------------
+
+function clearNegativeCache() {
+  if (!fs.existsSync(CACHE_DIR)) {
+    console.log('  Cache directory does not exist — nothing to clear.\n');
+    return;
+  }
+  const files = fs.readdirSync(CACHE_DIR).filter((f) => f.endsWith('.json'));
+  const SENTINEL = '{"record":null}'; // exactly 15 bytes
+  let removed = 0;
+  for (const file of files) {
+    const full = path.join(CACHE_DIR, file);
+    // Size check first — avoids reading every file.
+    const { size } = fs.statSync(full);
+    if (size === SENTINEL.length && fs.readFileSync(full, 'utf8').trim() === SENTINEL) {
+      fs.unlinkSync(full);
+      removed++;
+    }
+  }
+  console.log(`  Cleared ${removed.toLocaleString()} sentinel files (${files.length.toLocaleString()} checked).\n`);
+}
+
 // --- query helpers ---------------------------------------------------------
 
 /** Run a SELECT and return rows as plain objects. */
@@ -124,13 +147,33 @@ async function enrichImages({ limit } = {}) {
   if (limit && Number.isInteger(limit) && limit > 0) {
     sql += ` LIMIT ${limit}`;
   }
-  const todo = selectRows(readDb, sql, ENRICH_DEPARTMENTS)
-    .map((r) => r.object_id)
-    .filter((id) => !fs.existsSync(cachePathFor(id)));
+  const fromDb = selectRows(readDb, sql, ENRICH_DEPARTMENTS).map((r) => r.object_id);
+
+  // Also report total objects in those departments so we can spot a wrong DB.
+  const deptTotal = selectRows(
+    readDb,
+    `SELECT COUNT(*) AS n FROM objects WHERE department IN (${deptPlaceholders})`,
+    ENRICH_DEPARTMENTS
+  )[0]?.n ?? 0;
+  const nullTotal = selectRows(
+    readDb,
+    `SELECT COUNT(*) AS n FROM objects WHERE primary_image IS NULL AND department IN (${deptPlaceholders})`,
+    ENRICH_DEPARTMENTS
+  )[0]?.n ?? 0;
   readDb.close();
 
+  console.log(`  DB: ${deptTotal.toLocaleString()} objects in target departments, ${nullTotal.toLocaleString()} with no image`);
+
+  const todo = fromDb.filter((id) => !fs.existsSync(cachePathFor(id)));
+  console.log(`  SQL returned ${fromDb.length.toLocaleString()} candidates, cache filter left ${todo.length.toLocaleString()}\n`);
+
   if (todo.length === 0) {
-    console.log('  Nothing to enrich — every object already has an image.\n');
+    if (nullTotal === 0) {
+      console.log('  Nothing to enrich — every object in the target departments already has an image.\n');
+    } else {
+      console.log(`  Nothing to enrich — all ${nullTotal.toLocaleString()} unenriched objects are covered by cache files.\n`);
+      console.log('  Run with --clear-cache to delete null sentinels and retry those objects.\n');
+    }
     return { enriched: 0, fromCache: 0, fromApi: 0, noImage: 0, notFound: 0 };
   }
 
@@ -219,13 +262,23 @@ function parseArgs(argv) {
     if (argv[i] === '--limit') {
       args.limit = parseInt(argv[i + 1], 10);
       i++;
+    } else if (argv[i] === '--clear-cache') {
+      args.clearCache = true;
     }
   }
   return args;
 }
 
 if (require.main === module) {
-  enrichImages(parseArgs(process.argv)).catch((err) => {
+  const args = parseArgs(process.argv);
+  const run = async () => {
+    if (args.clearCache) {
+      console.log('\nClearing negative cache entries…');
+      clearNegativeCache();
+    }
+    await enrichImages(args);
+  };
+  run().catch((err) => {
     console.error('Enrichment failed:', err);
     process.exit(1);
   });

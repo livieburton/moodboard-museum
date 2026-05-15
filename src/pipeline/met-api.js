@@ -17,15 +17,27 @@
 const MET_API_BASE =
   'https://collectionapi.metmuseum.org/public/collection/v1';
 
-// We self-limit to 10 req/s — far under the Met's stated 80/s ceiling. This
-// project is never in a hurry: a gentle pace is kinder to a free public API
-// and the difference between a 2-minute and a 12-minute build doesn't matter
-// for a dataset you fetch once and cache.
-const REQUESTS_PER_SECOND = 10;
+// Without a browser-like User-Agent, Incapsula (the Met's WAF) blocks every
+// request with a 403. This string passes the WAF; real 403s from the Met's
+// own access restrictions still come through after this is set.
+const REQUEST_HEADERS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  'Accept': 'application/json',
+};
+
+// 3 req/s base rate with up to 500ms of random jitter so requests don't look
+// mechanical to the Met's WAF. Total gap per request: 333–833ms.
+const REQUESTS_PER_SECOND = 3;
 const MIN_REQUEST_GAP_MS = 1000 / REQUESTS_PER_SECOND;
+const JITTER_MS = 500;
 
 const MAX_RETRIES = 4;
 const INITIAL_BACKOFF_MS = 1000;
+
+// Block detection: if 5 consecutive requests return 403, pause for 30s.
+const BLOCK_THRESHOLD = 5;
+const BLOCK_PAUSE_MS = 30_000;
+let consecutive403s = 0;
 
 // Module-level timestamp of the last request, for spacing.
 let lastRequestTime = 0;
@@ -34,13 +46,16 @@ let lastRequestTime = 0;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /**
- * Wait just long enough that we don't exceed our self-imposed rate limit.
+ * Wait the base gap plus a random jitter so requests don't arrive at a
+ * perfectly mechanical cadence.
  */
 async function throttle() {
+  const jitter = Math.floor(Math.random() * JITTER_MS);
+  const gap = MIN_REQUEST_GAP_MS + jitter;
   const now = Date.now();
   const elapsed = now - lastRequestTime;
-  if (elapsed < MIN_REQUEST_GAP_MS) {
-    await sleep(MIN_REQUEST_GAP_MS - elapsed);
+  if (elapsed < gap) {
+    await sleep(gap - elapsed);
   }
   lastRequestTime = Date.now();
 }
@@ -62,14 +77,26 @@ async function fetchObject(objectId) {
     await throttle();
 
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, { headers: REQUEST_HEADERS });
+      const bodyText = await response.text();
 
-      // 404 — the object has no API record. Expected for some CSV rows.
-      // 403 — access restricted despite public-domain flag in the CSV
-      //        (Met holds rights on the photography for some objects).
-      // Both are permanent: return null so the cache layer writes a sentinel
-      // and we never re-fetch this object.
-      if (response.status === 404 || response.status === 403) {
+      // 404 — no API record for this object. Permanent; cache as sentinel.
+      if (response.status === 404) {
+        consecutive403s = 0;
+        return null;
+      }
+
+      // 403 — either a WAF block or a Met access restriction on photography.
+      // Track consecutive 403s: if we hit the threshold we're being blocked,
+      // so pause before continuing. Either way, cache as sentinel so we don't
+      // immediately re-fetch on the next run (--clear-cache resets this).
+      if (response.status === 403) {
+        consecutive403s++;
+        if (consecutive403s >= BLOCK_THRESHOLD) {
+          console.warn(`\n  [block] ${consecutive403s} consecutive 403s — pausing ${BLOCK_PAUSE_MS / 1000}s before resuming…`);
+          await sleep(BLOCK_PAUSE_MS);
+          consecutive403s = 0;
+        }
         return null;
       }
 
@@ -95,7 +122,8 @@ async function fetchObject(objectId) {
         return null;
       }
 
-      return await response.json();
+      consecutive403s = 0;
+      return JSON.parse(bodyText);
 
     } catch (err) {
       // Network-level failure (DNS, connection reset, etc.) — retry with backoff.

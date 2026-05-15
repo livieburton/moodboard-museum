@@ -530,3 +530,23 @@ body {
     width: 100vw;
   }
 }
+
+/* ── Footer ── */
+
+.app-footer {
+  text-align: center;
+  padding: 2rem 2.5rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border);
+}
+
+.app-footer a {
+  color: var(--text-muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.app-footer a:hover {
+  color: var(--text-secondary);
+}

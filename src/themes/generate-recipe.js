@@ -20,6 +20,7 @@ Given a short phrase describing a visual mood or aesthetic (e.g. "steampunk", "w
   "source": "llm",
   "filters": {
     "tags": ["tag1", "tag2"],
+    "excludeTags": ["tag3"],
     "classifications": ["..."],
     "departments": ["..."],
     "cultures": ["..."],
@@ -37,6 +38,7 @@ Rules:
 - classifications MUST only use values from this list (exact case): ${KNOWN_CLASSIFICATIONS.join(', ')}
 - departments MUST only use values from this list (exact case): ${KNOWN_DEPARTMENTS.join(', ')}
 - tags should be evocative subject terms likely to appear in museum tag vocabularies (e.g. "Portraits", "Flowers", "Battles", "Animals", "Landscapes", "Skulls", "Ships", "Fire")
+- excludeTags: use to remove off-aesthetic content. Examples: if the query is feminine/women-focused, add "Men" to excludeTags; if peaceful, add "Battle", "Military", "Soldiers"; if nature-focused, add "Portraits"
 - mediumKeywords are substrings matched against medium field (e.g. "oil", "watercolor", "bronze", "silk", "engraving", "ink")
 - cultures are geographic/ethnic origin strings (e.g. "French", "Japanese", "Egyptian")
 - dateRange uses years (negative for BC); omit if the aesthetic spans all eras

@@ -7,8 +7,9 @@ dist/
 # Generated database — rebuilt from the CSV via `npm run build-db`
 data/*.sqlite
 
-# API response cache — regenerated on demand, can get large.
-# (If you'd rather commit it so the cache is shared/portable, delete this line.)
+# API response cache — lives outside OneDrive to avoid sync churn.
+# Local path: C:\Users\livie\AppData\Local\moodboard-museum-cache\
+# Regenerated on demand; never needs to be committed.
 data/cache/
 
 # The real Met CSV — it's ~300MB and downloaded separately, not committed.
