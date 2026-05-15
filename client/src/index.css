@@ -1,0 +1,270 @@
+:root {
+  --bg: #f7f5f2;
+  --surface: #ffffff;
+  --border: #e8e4de;
+  --text: #1a1814;
+  --text-secondary: #4a4540;
+  --text-muted: #7a7470;
+  --accent: #2c4a3e;
+  --accent-hover: #223a30;
+  --serif: 'DM Serif Display', Georgia, serif;
+  --sans: system-ui, -apple-system, sans-serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Header ── */
+
+.app-header {
+  padding: 2.25rem 2.5rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+}
+
+.app-header h1 {
+  font-family: var(--serif);
+  font-size: 1.75rem;
+  font-weight: normal;
+  letter-spacing: 0.01em;
+  color: var(--text);
+}
+
+.app-tagline {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Search view ── */
+
+.search-view {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2rem 2.5rem 4rem;
+}
+
+/* ── Search form ── */
+
+.search-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.12s;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+}
+
+.search-input:disabled {
+  opacity: 0.6;
+}
+
+.search-button {
+  padding: 0.625rem 1.25rem;
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.search-button:hover:not(:disabled) {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.search-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ── Theme picker ── */
+
+.theme-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.theme-pill {
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+}
+
+.theme-pill:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.theme-pill.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* ── Match reason bar ── */
+
+.match-reason-bar {
+  font-size: 0.8rem;
+  color: #7a6a60;
+  margin-bottom: 1.75rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ── Masonry grid ── */
+
+.results-grid {
+  columns: 4 260px;
+  column-gap: 1.25rem;
+}
+
+/* ── Artwork card ── */
+
+.artwork-card {
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  break-inside: avoid;
+  margin-bottom: 1.25rem;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.artwork-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-color: #d4cfc8;
+}
+
+.artwork-card__image {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--bg);
+  transition: transform 0.35s ease;
+}
+
+.artwork-card:hover .artwork-card__image {
+  transform: scale(1.02);
+}
+
+.artwork-card__image--placeholder {
+  width: 100%;
+  height: 220px;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.artwork-card__body {
+  padding: 0.875rem 1rem 1rem;
+}
+
+.artwork-card__title {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  font-weight: normal;
+  line-height: 1.35;
+  color: var(--text);
+  margin-bottom: 0.2rem;
+}
+
+.artwork-card__artist {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-bottom: 0.625rem;
+}
+
+.artwork-card__reason {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  padding-top: 0.625rem;
+  border-top: 1px solid var(--border);
+}
+
+/* ── State messages ── */
+
+.state-message {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 5rem 2rem;
+  letter-spacing: 0.01em;
+}
+
+.state-message.error {
+  color: #8b2e2e;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 600px) {
+  .app-header {
+    flex-direction: column;
+    gap: 0.375rem;
+    padding: 1.5rem 1.25rem 1rem;
+  }
+
+  .search-view {
+    padding: 1.25rem 1.25rem 3rem;
+  }
+
+  .results-grid {
+    columns: 1;
+  }
+}

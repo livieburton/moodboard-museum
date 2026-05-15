@@ -1,0 +1,49 @@
+{
+  "name": "moodboard-museum",
+  "version": "0.1.0",
+  "description": "Search CC0 museum artwork and build moodboards from real, human-made art.",
+  "main": "server/index.js",
+  "scripts": {
+    "fixture": "node src/data/make-fixture.js",
+    "build-db": "node src/pipeline/build-db.js",
+    "build-db-highlights": "node src/pipeline/build-db-highlights.js",
+    "build-db-highlights:test": "node src/pipeline/build-db-highlights.js --test",
+    "build-db-highlights:swap": "node src/pipeline/build-db-highlights.js --swap",
+    "build-db-api": "node src/pipeline/build-db-from-api.js",
+    "build-db-api:test": "node src/pipeline/build-db-from-api.js --test",
+    "build-db-api:swap": "node src/pipeline/build-db-from-api.js --swap",
+    "verify-db": "node src/pipeline/verify-db.js",
+    "enrich": "node src/pipeline/enrich-images.js",
+    "test-enrich": "node src/pipeline/test-enrich.js",
+    "foundation": "npm run fixture && npm run build-db && npm run verify-db",
+    "dev:server": "node server/index.js",
+    "dev:client": "vite",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "build": "vite build",
+    "start": "NODE_ENV=production node server/index.js"
+  },
+  "keywords": [
+    "museum",
+    "art",
+    "cc0",
+    "open-access",
+    "moodboard",
+    "met"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.54.0",
+    "csv-parse": "^6.2.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^8.5.2",
+    "sql.js": "^1.14.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "concurrently": "^8.2.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^5.4.0"
+  }
+}

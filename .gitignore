@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Generated database — rebuilt from the CSV via `npm run build-db`
+data/*.sqlite
+
+# API response cache — regenerated on demand, can get large.
+# (If you'd rather commit it so the cache is shared/portable, delete this line.)
+data/cache/
+
+# The real Met CSV — it's ~300MB and downloaded separately, not committed.
+# The small sample fixture in src/data/ IS committed (it's tiny and useful).
+MetObjects.csv
+*.csv.gz
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Environment variables — never commit secrets
+.env
+.env.local
+.env.txt
+
+# Logs
+*.log
+npm-debug.log*
