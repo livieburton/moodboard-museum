@@ -12,6 +12,22 @@ Moodboard Museum bridges internet aesthetics and art history. Type "dark academi
 
 Every result is a real artwork with a known artist, date, and provenance. Every image is CC0-licensed and links back to its page on metmuseum.org.
 
+## Why Moodboard Museum?
+
+Ask an AI image generator to make a "cottagecore moodboard" and you'll get thatched cottages, wildflowers in ceramic jugs, a woman reading by a window with a cat. It's beautiful. It's also exactly what you expected.
+
+That's how generative AI works: it learns to produce the statistical average of what the internet already agrees an aesthetic looks like. The result is consensus — polished, coherent, and completely unsurprising.
+
+Moodboard Museum runs in the opposite direction.
+
+Search "cottagecore" and you don't get a generated image that looks vaguely right. You get Frederic Church's Hudson River landscapes. Martin Johnson Heade's hummingbird over apple blossoms. A Winslow Homer watercolor of a Bermuda garden. Real paintings by real artists — and not the obvious ones. That's discovery, not generation.
+
+Every result has a name, a date, and a story. You can cite it, research it, follow the thread from a TikTok aesthetic back through 200 years of art history. The feelings we associate with "cottagecore" or "dark academia" didn't emerge from nowhere — they have roots in real artistic traditions, and Moodboard Museum makes that lineage visible.
+
+Gemini shows you what the internet thinks cottagecore looks like. Moodboard Museum shows you where cottagecore came from.
+
+Currently sourcing from the Metropolitan Museum of Art's Open Access collection (CC0). Additional museums coming soon.
+
 ## Why it's different
 
 AI image generators give you something that looks vaguely right. Moodboard Museum gives you Gustave Courbet.
