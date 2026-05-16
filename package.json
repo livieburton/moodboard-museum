@@ -20,7 +20,8 @@
     "dev:client": "vite",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build": "vite build",
-    "start": "NODE_ENV=production node server/index.js"
+    "prepare-db": "node scripts/prepare-db.js",
+    "start": "npm run prepare-db && NODE_ENV=production node server/index.js"
   },
   "keywords": [
     "museum",
