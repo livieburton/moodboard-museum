@@ -80,6 +80,13 @@ npm run dev
 
 Set `ANTHROPIC_API_KEY` in your environment for free-text search.
 
+## Deploying database updates
+
+1. **Stop enrichment** — if `npm run enrich` is running, kill it so the DB isn't mid-write
+2. **Regenerate the snapshot** — `node scripts/compress-db.js` (overwrites `data/moodboard.sqlite.snapshot.gz`)
+3. **Commit and push** — `git add data/moodboard.sqlite.snapshot.gz && git commit -m "Update DB snapshot" && git push`
+4. **Restart enrichment** — resume `npm run enrich` locally; the deployed server decompresses the new snapshot on next start
+
 ## Data sources
 
 All artwork is from the [Metropolitan Museum of Art Open Access collection](https://www.metmuseum.org/about-the-met/policies-and-documents/open-access), released under CC0. The Met asks that reproductions include a credit line linking back to the original object page — this site does so on every result.

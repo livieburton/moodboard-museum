@@ -435,28 +435,65 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Moodboard thumbnail grid ── */
+/* ── Moodboard thumbnail grid (masonry via CSS columns) ── */
 
 .moodboard-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  column-count: 4;
+  column-gap: 0.5rem;
 }
 
 .moodboard-thumb {
   position: relative;
-  aspect-ratio: 1;
   overflow: hidden;
   border-radius: 2px;
   border: 1px solid var(--border);
   background: var(--bg);
+  break-inside: avoid;
+  margin-bottom: 0.5rem;
+  cursor: grab;
+}
+
+.moodboard-thumb:active {
+  cursor: grabbing;
 }
 
 .moodboard-thumb__img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
   display: block;
+}
+
+/* Faded placeholder where dragged item will land */
+.moodboard-thumb--placeholder {
+  opacity: 0.3;
+}
+
+/* Elevated clone that follows the pointer */
+.moodboard-thumb--overlay {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  transform: scale(1.04);
+  cursor: grabbing;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.moodboard-thumb__number {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-family: var(--serif);
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  user-select: none;
+  line-height: 1;
 }
 
 .moodboard-thumb__remove {
@@ -483,10 +520,15 @@ body {
   opacity: 1;
 }
 
-/* ── Download button ── */
+/* ── Download / Share buttons ── */
+
+.moodboard-panel__footer {
+  display: flex;
+  gap: 0.5rem;
+}
 
 .moodboard-download-btn {
-  width: 100%;
+  flex: 1;
   padding: 0.65rem 1rem;
   border: 1px solid var(--accent);
   border-radius: 2px;
@@ -504,30 +546,168 @@ body {
   border-color: var(--accent-hover);
 }
 
+.moodboard-download-btn--secondary {
+  background: transparent;
+  color: var(--accent);
+}
+
+.moodboard-download-btn--secondary:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+@media (max-width: 1024px) {
+  .moodboard-grid {
+    column-count: 3;
+  }
+}
+
+/* ── Sticky mobile bottom bar (hidden on desktop) ── */
+
+.mobile-moodboard-bar {
+  display: none;
+}
+
 /* ── Responsive ── */
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
+  /* Header: one row, wordmark left, button right */
   .app-header {
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    padding: 1rem 1.25rem;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
   }
 
   .app-header__left {
     flex-direction: column;
-    gap: 0.25rem;
+    align-items: flex-start;
+    gap: 0.1rem;
+    min-width: 0;
   }
 
+  /* Wordmark ~60% of desktop 1.75rem */
+  .app-header h1 {
+    font-size: 1.05rem;
+  }
+
+  /* Tagline: sentence case, smaller, tight */
+  .app-tagline {
+    font-size: 0.68rem;
+    text-transform: none;
+    letter-spacing: 0.01em;
+  }
+
+  /* Desktop moodboard button hidden — replaced by sticky bottom bar */
+  .moodboard-btn {
+    display: none;
+  }
+
+  /* Search view: compressed top, extra bottom clears the 56px bar */
   .search-view {
-    padding: 1.25rem 1.25rem 3rem;
+    padding: 0.875rem 1rem calc(56px + 1.25rem);
   }
 
+  /* Search form: full-width input, hide button (Enter submits) */
+  .search-form {
+    flex-direction: column;
+    margin-bottom: 0.875rem;
+  }
+
+  .search-button {
+    display: none;
+  }
+
+  /* Theme pills: single-row horizontal scroll with right-edge fade */
+  .theme-picker {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-bottom: 1rem;
+    padding-bottom: 0.125rem;
+    -webkit-mask-image: linear-gradient(to right, black 82%, transparent 100%);
+    mask-image: linear-gradient(to right, black 82%, transparent 100%);
+  }
+
+  .theme-picker::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Pills: min 44px tap target, no wrapping */
+  .theme-pill {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 0 1.1rem;
+  }
+
+  /* 2-column masonry with 8px gap */
   .results-grid {
-    columns: 1;
+    columns: 2;
+    column-gap: 0.5rem;
   }
 
+  /* Card title: max 2 lines, ellipsis on overflow */
+  .artwork-card__title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* "+ Add" button: full-width, min 44px tap target */
+  .artwork-card__add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    margin-top: 0.5rem;
+  }
+
+  /* 2-column moodboard grid on mobile */
+  .moodboard-grid {
+    column-count: 2;
+  }
+
+  /* Remove button always visible on touch devices */
+  .moodboard-thumb__remove {
+    opacity: 1;
+  }
+
+  /* Moodboard panel full-width */
   .moodboard-panel {
     width: 100vw;
+  }
+
+  /* Sticky bottom bar */
+  .mobile-moodboard-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    padding: 0 1.25rem;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.07);
+    z-index: 100;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .mobile-moodboard-bar__label {
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.02em;
   }
 }
 
