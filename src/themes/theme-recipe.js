@@ -201,7 +201,7 @@ const EXAMPLE_RECIPES = {
         'Frogs', 'Spiders', 'Dragonflies', 'Butterflies', 'Lizards'],
       mediumKeywords: ['ink', 'engraving', 'etching', 'woodblock'],
       dateRange: { start: 1500, end: 1900 },
-      excludeTags: ['Battle', 'Military', 'Portraits', 'Mythology'],
+      excludeTags: ['Battle', 'Military', 'Portraits', 'Mythology', 'Certificates', 'Documents', 'Calligraphy'],
     },
     rationale: ['Drawings and prints', 'From 1500 to 1900', 'Tagged with Insects, Plants, Snails, Frogs, or Butterflies', 'Made with ink, engraving, or etching'],
     source: 'curated',
