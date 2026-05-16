@@ -1,4 +1,44 @@
 export default function MoodboardPanel({ artworks, onRemove, onClose, isOpen }) {
+  function museumName(linkResource) {
+    if (linkResource && linkResource.includes('metmuseum.org')) return 'The Met';
+    return 'The Met';
+  }
+
+  function truncateText(ctx, text, maxWidth) {
+    if (ctx.measureText(text).width <= maxWidth) return text;
+    let truncated = text;
+    while (truncated.length > 0 && ctx.measureText(truncated + '…').width > maxWidth) {
+      truncated = truncated.slice(0, -1);
+    }
+    return truncated + '…';
+  }
+
+  function drawAttribution(ctx, artwork, cellX, cellY, cellSize) {
+    const GRADIENT_HEIGHT = cellSize * 0.25;
+    const gradientY = cellY + cellSize - GRADIENT_HEIGHT;
+    const grad = ctx.createLinearGradient(0, gradientY, 0, cellY + cellSize);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.35)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(cellX, gradientY, cellSize, GRADIENT_HEIGHT);
+
+    const PAD = 8;
+    const maxTextWidth = cellSize - PAD * 2;
+
+    const title = artwork.title || 'Untitled';
+    const artist = artwork.artist_name || '';
+    const museum = museumName(artwork.link_resource);
+    const byline = artist ? `${artist} · ${museum}` : museum;
+
+    ctx.font = '11px system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.75)';
+    ctx.fillText(truncateText(ctx, byline, maxTextWidth), cellX + PAD, cellY + cellSize - PAD);
+
+    ctx.font = '12px system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(truncateText(ctx, title, maxTextWidth), cellX + PAD, cellY + cellSize - PAD - 16);
+  }
+
   async function downloadMoodboard() {
     if (artworks.length === 0) return;
     const COLS = 3;
@@ -18,16 +58,19 @@ export default function MoodboardPanel({ artworks, onRemove, onClose, isOpen }) 
           img.onload = () => {
             const col = i % COLS;
             const row = Math.floor(i / COLS);
+            const cellX = col * CELL;
+            const cellY = row * CELL;
             const scale = Math.max(CELL / img.width, CELL / img.height);
             const w = img.width * scale;
             const h = img.height * scale;
-            const x = col * CELL + (CELL - w) / 2;
-            const y = row * CELL + (CELL - h) / 2;
+            const x = cellX + (CELL - w) / 2;
+            const y = cellY + (CELL - h) / 2;
             ctx.save();
             ctx.beginPath();
-            ctx.rect(col * CELL, row * CELL, CELL, CELL);
+            ctx.rect(cellX, cellY, CELL, CELL);
             ctx.clip();
             ctx.drawImage(img, x, y, w, h);
+            drawAttribution(ctx, artwork, cellX, cellY, CELL);
             ctx.restore();
             resolve();
           };
