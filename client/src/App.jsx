@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import HeroPage from './pages/HeroPage';
 import SearchView from './views/SearchView';
 import MoodboardPanel from './components/MoodboardPanel';
@@ -44,7 +44,9 @@ function AppShell() {
   return (
     <div className="app">
       <header className={`app-header${showHeader ? ' app-header--visible' : ''}`}>
-        <img src="/logo2.png" alt="Moodboard Museum" className="app-logo--sticky" />
+        <Link to="/" className="app-logo--sticky-link">
+          <img src="/logo2.png" alt="Moodboard Museum" className="app-logo--sticky" />
+        </Link>
       </header>
 
       <Routes>
@@ -66,7 +68,7 @@ function AppShell() {
         />
       </Routes>
 
-      {!panelOpen && (
+      {isExplore && !panelOpen && (
         <button
           className="moodboard-fab"
           aria-label={`Open moodboard, ${moodboard.length} items`}

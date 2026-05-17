@@ -12,8 +12,6 @@ export default function HeroPage() {
         const artworks = (data.results || []).filter(
           (a) => a.primary_image_small || a.primary_image
         );
-        console.log('[HeroPage] loaded', artworks.length, 'images for mosaic');
-
         if (artworks.length === 0) return;
 
         // Distribute evenly across 3 strips — works even with < 60 results
