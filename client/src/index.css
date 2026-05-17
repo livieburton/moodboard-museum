@@ -32,29 +32,13 @@ body {
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
+  justify-content: center;
 }
 
-.app-header__left {
-  display: flex;
-  align-items: baseline;
-  gap: 1.5rem;
-}
-
-.app-header h1 {
-  font-family: var(--serif);
-  font-size: 1.75rem;
-  font-weight: normal;
-  letter-spacing: 0.01em;
-  color: var(--text);
-}
-
-.app-tagline {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.app-logo {
+  height: 48px;
+  width: auto;
+  display: block;
 }
 
 /* ── Search view ── */
@@ -562,6 +546,151 @@ body {
   }
 }
 
+/* ── Editable moodboard title ── */
+
+.moodboard-title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+  padding: 0.75rem 0 0.5rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: color 0.12s;
+}
+
+.moodboard-title:hover {
+  color: var(--accent);
+}
+
+.moodboard-title-input {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.2;
+  width: 100%;
+  border: none;
+  border-bottom: 2px solid var(--accent);
+  background: transparent;
+  outline: none;
+  padding: 0.75rem 0 0.5rem;
+  margin-bottom: 0.75rem;
+  display: block;
+}
+
+/* ── Grid / Export preview toggle ── */
+
+.moodboard-view-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.moodboard-view-toggle__btn {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.03em;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+
+.moodboard-view-toggle__btn + .moodboard-view-toggle__btn {
+  border-left: 1px solid var(--border);
+}
+
+.moodboard-view-toggle__btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ── Export preview (DOM approximation of the exported PNG) ── */
+
+.export-preview {
+  font-size: 0.8rem;
+}
+
+.export-preview__title {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.export-preview__grid {
+  column-count: 3;
+  column-gap: 0.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.export-preview__thumb {
+  position: relative;
+  break-inside: avoid;
+  margin-bottom: 0.3rem;
+}
+
+.export-preview__thumb img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.export-preview__badge {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-family: var(--serif);
+  font-size: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.export-preview__divider {
+  height: 1px;
+  background: var(--border);
+  margin: 0.5rem 0;
+}
+
+.export-preview__credits {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+
+.export-preview__credits li {
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.export-preview__credits em {
+  font-style: italic;
+}
+
+.export-preview__logo {
+  display: block;
+  width: 80px;
+  margin: 0 auto 0.5rem;
+}
+
 /* ── Sticky mobile bottom bar (hidden on desktop) ── */
 
 .mobile-moodboard-bar {
@@ -571,36 +700,13 @@ body {
 /* ── Responsive ── */
 
 @media (max-width: 640px) {
-  /* Header: one row, wordmark left, button right */
+  /* Header: centered logo, scaled to ~60% */
   .app-header {
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.625rem 1rem;
+    padding: 0.75rem 1rem;
   }
 
-  .app-header__left {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.1rem;
-    min-width: 0;
-  }
-
-  /* Wordmark ~60% of desktop 1.75rem */
-  .app-header h1 {
-    font-size: 1.05rem;
-  }
-
-  /* Tagline: sentence case, smaller, tight */
-  .app-tagline {
-    font-size: 0.68rem;
-    text-transform: none;
-    letter-spacing: 0.01em;
-  }
-
-  /* Desktop moodboard button hidden — replaced by sticky bottom bar */
-  .moodboard-btn {
-    display: none;
+  .app-logo {
+    height: 29px; /* 60% of 48px */
   }
 
   /* Search view: compressed top, extra bottom clears the 56px bar */

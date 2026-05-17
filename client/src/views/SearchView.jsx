@@ -3,7 +3,7 @@ import ThemePicker from '../components/ThemePicker';
 import ArtworkCard from '../components/ArtworkCard';
 import { listThemes, queryTheme, searchFreeText } from '../api';
 
-export default function SearchView({ onAddToMoodboard, moodboard = [] }) {
+export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleChange }) {
   const [themes, setThemes] = useState([]);
   const [activeSlug, setActiveSlug] = useState(null);
   const [results, setResults] = useState(null);
@@ -21,6 +21,8 @@ export default function SearchView({ onAddToMoodboard, moodboard = [] }) {
   }, []);
 
   async function handleSelectTheme(slug) {
+    const theme = themes.find((t) => t.slug === slug);
+    if (theme && onTitleChange) onTitleChange(theme.label);
     setActiveSlug(slug);
     setSearchInput('');
     setLoading(true);
@@ -42,6 +44,7 @@ export default function SearchView({ onAddToMoodboard, moodboard = [] }) {
     const q = searchInput.trim();
     if (!q || searchInFlight.current) return;
     searchInFlight.current = true;
+    if (onTitleChange) onTitleChange(q);
     setActiveSlug(null);
     setLoading(true);
     setError(null);
