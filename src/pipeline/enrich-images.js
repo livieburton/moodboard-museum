@@ -31,7 +31,8 @@
 
 const fs = require('fs');
 const path = require('path');
-const { openDb, saveDb } = require('./db');
+const { DatabaseSync } = require('node:sqlite');
+const { DB_PATH } = require('./db');
 const { fetchObject, extractImageUrls } = require('./met-api');
 
 const CACHE_DIR = path.join('C:\\Users\\livie\\AppData\\Local\\moodboard-museum-cache');
@@ -116,27 +117,17 @@ function clearNegativeCache() {
 
 /** Run a SELECT and return rows as plain objects. */
 function selectRows(db, sql, params = []) {
-  const stmt = db.prepare(sql);
-  if (params.length > 0) stmt.bind(params);
-  const rows = [];
-  while (stmt.step()) rows.push(stmt.getAsObject());
-  stmt.free();
-  return rows;
+  return db.prepare(sql).all(...params);
 }
 
 // --- main ------------------------------------------------------------------
 
 const BATCH_SIZE = 25;
 
-async function enrichImages({ limit } = {}) {
+async function enrichImages({ limit } = {}) { // async kept for fetchObject (network calls)
   console.log('\nMoodboard Museum — image enrichment\n');
 
-  // Read the todo list in a short-lived connection, then close it.
-  // Each batch below opens its own connection so that saveDb() — which calls
-  // db.export() internally — never runs while a prepared statement is open.
-  // sql.js's WASM implementation invalidates prepared statements on export(),
-  // which caused "Statement closed" errors when saveDb() fired mid-loop.
-  const { db: readDb } = await openDb();
+  const readDb = new DatabaseSync(DB_PATH);
   const deptPlaceholders = ENRICH_DEPARTMENTS.map(() => '?').join(', ');
   let sql = `
     SELECT object_id FROM objects
@@ -149,7 +140,6 @@ async function enrichImages({ limit } = {}) {
   }
   const fromDb = selectRows(readDb, sql, ENRICH_DEPARTMENTS).map((r) => r.object_id);
 
-  // Also report total objects in those departments so we can spot a wrong DB.
   const deptTotal = selectRows(
     readDb,
     `SELECT COUNT(*) AS n FROM objects WHERE department IN (${deptPlaceholders})`,
@@ -187,53 +177,42 @@ async function enrichImages({ limit } = {}) {
   for (let batchStart = 0; batchStart < todo.length; batchStart += BATCH_SIZE) {
     const batch = todo.slice(batchStart, batchStart + BATCH_SIZE);
 
-    // Fresh connection per batch — statement lifetime never crosses a saveDb().
-    const { db } = await openDb();
+    // node:sqlite writes directly to disk — no export/serialization, no OOM.
+    const db = new DatabaseSync(DB_PATH);
     const updateStmt = db.prepare(
       `UPDATE objects SET primary_image = ?, primary_image_small = ? WHERE object_id = ?`
     );
 
-    db.run('BEGIN');
+    db.exec('BEGIN');
     for (const objectId of batch) {
       processed++;
 
-      // 1. Try the cache first.
       const cacheResult = readCache(objectId);
       let apiRecord;
 
-      // 2. Cache miss -> hit the API, then cache whatever we get back.
-      //    Cache hit -> use the cached record (even if it's null, i.e. a
-      //    remembered 404 — that still counts as resolved, no API call needed).
       if (cacheResult.hit) {
         apiRecord = cacheResult.record;
         stats.fromCache++;
       } else {
         apiRecord = await fetchObject(objectId);
-        writeCache(objectId, apiRecord); // caches null too, so 404s aren't re-fetched
+        writeCache(objectId, apiRecord);
         stats.fromApi++;
       }
 
-      // 3. Interpret the record.
       if (apiRecord === null) {
-        // The object has no API record at all (404). Leave image columns null.
         stats.notFound++;
       } else {
         const { primaryImage, primaryImageSmall } = extractImageUrls(apiRecord);
         if (primaryImage) {
-          updateStmt.run([primaryImage, primaryImageSmall, objectId]);
+          updateStmt.run(primaryImage, primaryImageSmall, objectId);
           stats.enriched++;
         } else {
-          // Record exists but has no image (some PD objects aren't photographed).
           stats.noImage++;
         }
       }
     }
-    db.run('COMMIT');
-
-    // Free the statement before saving — this is the fix.
-    updateStmt.free();
-    saveDb(db);
-    db.close();
+    db.exec('COMMIT');
+    db.close(); // flushes directly to the .sqlite file — no saveDb() needed
 
     console.log(
       `  [${processed}/${todo.length}] ` +

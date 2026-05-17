@@ -1,8 +1,9 @@
 import { useState } from 'react';
 
 export default function ArtworkCard({ artwork, onAdd, isAdded }) {
-  const { title, artist_name, museum, primary_image_small, primary_image, link_resource } = artwork;
+  const { object_id, title, artist_name, museum, primary_image_small, primary_image, link_resource } = artwork;
   const imgSrc = primary_image_small || primary_image;
+  const metUrl = link_resource || `https://www.metmuseum.org/art/collection/search/${object_id}`;
   const [hidden, setHidden] = useState(false);
 
   if (hidden) return null;
@@ -11,7 +12,7 @@ export default function ArtworkCard({ artwork, onAdd, isAdded }) {
     <div className="artwork-card">
       <a
         className="artwork-card__link"
-        href={link_resource}
+        href={metUrl}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`${title || 'Artwork'} — opens Met museum page`}
@@ -30,21 +31,21 @@ export default function ArtworkCard({ artwork, onAdd, isAdded }) {
             Not yet available
           </div>
         )}
+        <div className="artwork-card__body">
+          <p className="artwork-card__title">{title || '(untitled)'}</p>
+          {artist_name && <p className="artwork-card__artist">{artist_name}</p>}
+          {museum && <p className="artwork-card__museum">{museum}</p>}
+        </div>
       </a>
-      <div className="artwork-card__body">
-        <p className="artwork-card__title">{title || '(untitled)'}</p>
-        {artist_name && <p className="artwork-card__artist">{artist_name}</p>}
-        {museum && <p className="artwork-card__museum">{museum}</p>}
-        {onAdd && (
-          <button
-            className={`artwork-card__add${isAdded ? ' added' : ''}`}
-            onClick={() => !isAdded && onAdd(artwork)}
-            aria-label={isAdded ? 'Added to moodboard' : 'Add to moodboard'}
-          >
-            {isAdded ? '✓ Added' : '+ Add'}
-          </button>
-        )}
-      </div>
+      {onAdd && (
+        <button
+          className={`artwork-card__add${isAdded ? ' added' : ''}`}
+          onClick={() => !isAdded && onAdd(artwork)}
+          aria-label={isAdded ? 'Added to moodboard' : 'Add to moodboard'}
+        >
+          {isAdded ? '✓ Added' : '+ Add'}
+        </button>
+      )}
     </div>
   );
 }

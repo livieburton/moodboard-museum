@@ -69,7 +69,7 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
           ref={inputRef}
           className="search-input"
           type="text"
-          placeholder="Describe an aesthetic: steampunk, minimalism, goth"
+          placeholder="Describe an aesthetic: steampunk, goth, sunny..."
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           maxLength={200}

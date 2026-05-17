@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function HeroPage() {
   const [strips, setStrips] = useState([[], [], []]);
+  const [loadedStrips, setLoadedStrips] = useState([false, false, false]);
+  const loadCountsRef = useRef([0, 0, 0]);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     fetch('/api/random?limit=60')
@@ -14,29 +17,47 @@ export default function HeroPage() {
         );
         if (artworks.length === 0) return;
 
-        // Distribute evenly across 3 strips — works even with < 60 results
         const groups = [[], [], []];
         artworks.forEach((a, i) => groups[i % 3].push(a));
-
-        // Duplicate each group so the CSS translateX(-50%) loop is seamless
-        setStrips(groups.map((g) => [...g, ...g]));
+        setStrips(groups.map((g) => [...g, ...g, ...g, ...g]));
       })
       .catch((err) => console.error('[HeroPage] fetch failed:', err));
   }, []);
 
-  const speeds = ['30s', '42s', '55s'];
+  useEffect(() => {
+    const hero   = document.querySelector('.hero');
+    const mosaic = document.querySelector('.hero-mosaic');
+    const els    = document.querySelectorAll('.hero-strip');
+    console.log('[Hero heights]');
+    console.log('  hero:   ', hero?.getBoundingClientRect().height);
+    console.log('  mosaic: ', mosaic?.getBoundingClientRect().height);
+    els.forEach((s, i) => console.log(`  strip ${i}: `, s.getBoundingClientRect().height));
+  }, []);
+
+  const handleImageLoad = (si) => {
+    loadCountsRef.current[si]++;
+    if (loadCountsRef.current[si] === 3) {
+      setLoadedStrips((prev) => {
+        const next = [...prev];
+        next[si] = true;
+        return next;
+      });
+    }
+  };
+
+  const speeds = ['55s', '75s', '95s'];
   const reverses = [false, true, false];
 
   return (
     <section className="hero">
-      <div className="hero-mosaic">
+      <div className="hero-mosaic" key={location.pathname}>
         {strips.map((images, si) => (
           <div
             key={si}
-            className={`hero-strip${reverses[si] ? ' hero-strip--reverse' : ''}`}
+            className={`hero-strip${reverses[si] ? ' hero-strip--reverse' : ''}${loadedStrips[si] ? ' hero-strip--loaded' : ''}`}
           >
             <div
-              className="hero-strip__track"
+              className={`hero-strip__track${loadedStrips[si] ? ' hero-strip__track--animated' : ''}`}
               style={{ animationDuration: speeds[si] }}
             >
               {images.map((a, i) => (
@@ -46,6 +67,7 @@ export default function HeroPage() {
                   alt=""
                   className="hero-strip__img"
                   loading="eager"
+                  onLoad={() => handleImageLoad(si)}
                 />
               ))}
             </div>
@@ -56,16 +78,18 @@ export default function HeroPage() {
       <div className="hero-overlay" />
 
       <div className="hero-content">
-        <img src="/logo1.png" alt="Moodboard Museum" className="hero__logo" />
-        <p className="hero__intro">
-          Every aesthetic has a visual history, and much of it is hanging in museums. Moodboard Museum helps you find it.
-        </p>
-        <p className="hero__intro">
-          Every image here was made by a human.
-        </p>
-        <button className="hero__cta" onClick={() => navigate('/explore')}>
-          Start exploring →
-        </button>
+        <div className="hero-card">
+          <img src="/logo1.png" alt="Moodboard Museum" className="hero__logo" />
+          <p className="hero__intro">
+            Every aesthetic has a visual history, and much of it is hanging in museums. Moodboard Museum helps you find it.
+          </p>
+          <p className="hero__intro">
+            Every image here was made by a human.
+          </p>
+          <button className="hero__cta" onClick={() => navigate('/explore')}>
+            Start exploring →
+          </button>
+        </div>
       </div>
     </section>
   );

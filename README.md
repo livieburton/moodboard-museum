@@ -80,6 +80,12 @@ npm run dev
 
 Set `ANTHROPIC_API_KEY` in your environment for free-text search.
 
+## Development workflow
+
+- Run `npm run dev` to start the local dev server (Vite on `localhost:5173`, Express on `localhost:3001`)
+- Test on `localhost:5173` before pushing
+- Batch related changes into one commit
+
 ## Deploying database updates
 
 1. **Stop enrichment** — if `npm run enrich` is running, kill it so the DB isn't mid-write

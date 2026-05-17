@@ -306,6 +306,35 @@ const EXAMPLE_RECIPES = {
     source: 'curated',
   },
 
+  'millennial-pink': {
+    label: 'Millennial Pink',
+    description: 'Soft pink and rose tones — flowers, feminine subjects, soft interiors.',
+    filters: {
+      classifications: ['Paintings', 'Prints', 'Drawings'],
+      tags: ['Flowers', 'Women', 'Interiors', 'Still Life', 'Gardens'],
+      mediumKeywords: ['oil', 'watercolor', 'pastel'],
+      dateRange: { start: 1750, end: 1920 },
+      excludeTags: ['Battle', 'Military', 'Death', 'Nudes', 'Men', 'Boys',
+        'Soldiers', 'Mythology', 'Architecture'],
+    },
+    rationale: ['Paintings, prints, and drawings', 'From 1750 to 1920', 'Tagged with Flowers, Women, Interiors, or Still Life', 'Made with oil, watercolor, or pastel'],
+    source: 'curated',
+  },
+
+  'moody-blues': {
+    label: 'Moody Blues',
+    description: 'Deep blues and night tones — seascapes, night scenes, atmospheric landscapes.',
+    filters: {
+      classifications: ['Paintings', 'Prints'],
+      tags: ['Water', 'Sky', 'Night', 'Seascapes', 'Waves', 'Rain', 'Storms', 'Moonlight'],
+      mediumKeywords: ['oil', 'woodblock', 'engraving'],
+      dateRange: { start: 1600, end: 1920 },
+      excludeTags: ['Battle', 'Military', 'Portraits', 'Nudes', 'Mythology'],
+    },
+    rationale: ['Paintings and prints', 'From 1600 to 1920', 'Tagged with Water, Sky, Night, or Seascapes'],
+    source: 'curated',
+  },
+
   'mermaidcore': {
     label: 'Mermaidcore',
     description: 'Ocean depths and mythological seas — waves, sea creatures, and aquatic gods.',
@@ -351,18 +380,34 @@ const EXAMPLE_RECIPES = {
     source: 'curated',
   },
 
+  // Color themes v1 — tag-based. Phase 2: replace with pixel-based hex color extraction.
+  'earthy-tones': {
+    label: 'Earthy Tones',
+    description: 'Terracotta, ochre, and warm browns — still lifes, landscapes, and ceramics.',
+    filters: {
+      classifications: ['Paintings', 'Ceramics', 'Prints'],
+      tags: ['Landscapes', 'Still Life', 'Pottery', 'Farms', 'Fields', 'Earth'],
+      mediumKeywords: ['oil', 'watercolor', 'terracotta'],
+      dateRange: { start: 1600, end: 1920 },
+      excludeTags: ['Battle', 'Military', 'Nudes', 'Mythology', 'Death'],
+    },
+    rationale: ['Paintings, ceramics, and prints', 'From 1600 to 1920', 'Tagged with Landscapes, Still Life, or Pottery'],
+    source: 'curated',
+  },
+
   'girlboss': {
     label: 'Girlboss',
     description: 'Female power and confidence — portraits of women who commanded rooms.',
     filters: {
       classifications: ['Paintings', 'Prints'],
-      tags: ['Women', 'Portraits', 'Queens', 'Goddesses'],
+      tags: ['Women', 'Portraits', 'Queens', 'Goddesses', 'Girls'],
       mediumKeywords: ['oil', 'engraving'],
       dateRange: { start: 1400, end: 1920 },
       excludeTags: ['Battle', 'Military', 'Nudes', 'Children', 'Infants',
-        'Mother and Child', 'Mothers'],
+        'Mother and Child', 'Mothers', 'Men', 'Boys', 'Male', 'Soldiers',
+        'Warriors', 'Knights', 'Hunting'],
     },
-    rationale: ['Paintings and prints', 'From 1400 to 1920', 'Tagged with Women, Portraits, Queens, or Goddesses', 'Excluding domestic and military subjects'],
+    rationale: ['Paintings and prints', 'From 1400 to 1920', 'Tagged with Women, Portraits, Queens, or Goddesses', 'Excluding male subjects and military scenes'],
     source: 'curated',
   },
 

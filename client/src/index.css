@@ -36,8 +36,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 110px;
-  padding: 1rem 2.5rem;
+  min-height: 140px;
+  padding: 0;
   background: var(--bg);
   border-bottom: 1px solid var(--border);
   opacity: 0;
@@ -50,6 +50,37 @@ body {
   pointer-events: auto;
 }
 
+.app-header__inner {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  width: 100%;
+  max-width: 1600px;
+  padding: 0 2.5rem;
+}
+
+.app-header__side {
+  display: flex;
+}
+
+.app-header__side--right {
+  justify-content: flex-end;
+}
+
+.app-header__about-link {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.app-header__about-link:hover {
+  color: var(--accent);
+}
+
 .app-logo--sticky-link {
   display: flex;
   align-items: center;
@@ -57,9 +88,8 @@ body {
 }
 
 .app-logo--sticky {
-  height: 80px;
+  height: 120px;
   width: auto;
-  max-width: 480px;
   object-fit: contain;
   display: block;
 }
@@ -68,14 +98,20 @@ body {
 
 .hero {
   position: relative;
+  width: 100%;
   height: 100vh;
   overflow: hidden;
+  background-color: #2d4a3e;
 }
 
 /* Three scrolling strips fill the full viewport as background */
 .hero-mosaic {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   z-index: 0;
@@ -83,25 +119,39 @@ body {
 
 /* Explicit height so height: 100% resolves correctly on child images */
 .hero-strip {
-  height: 33.333vh;
+  flex: 1 1 0;
+  min-height: 0;
   overflow: hidden;
-  flex-shrink: 0;
+  position: relative;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.hero-strip--loaded {
+  opacity: 1;
 }
 
 .hero-strip__track {
   display: flex;
   height: 100%;
+  align-items: stretch;
   gap: 6px;
   width: max-content;
+}
+
+.hero-strip__track--animated {
   animation: mosaic-scroll 30s linear infinite;
 }
 
-.hero-strip--reverse .hero-strip__track {
+.hero-strip--reverse .hero-strip__track--animated {
   animation-direction: reverse;
 }
 
-.hero-mosaic:hover .hero-strip__track {
-  animation-play-state: paused;
+/* Hover-pause only on devices that support true hover (not touch) */
+@media (hover: hover) {
+  .hero-mosaic:hover .hero-strip__track {
+    animation-play-state: paused;
+  }
 }
 
 .hero-strip__img {
@@ -114,7 +164,7 @@ body {
 
 @keyframes mosaic-scroll {
   from { transform: translateX(0); }
-  to   { transform: translateX(-50%); }
+  to   { transform: translateX(-25%); }
 }
 
 /* Semi-transparent overlay so text reads against any image combo */
@@ -128,30 +178,55 @@ body {
 /* Centered content on top of overlay */
 .hero-content {
   position: absolute;
-  inset: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  padding: 1rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Invitation card — sits on top of the mosaic overlay */
+.hero-card {
+  position: relative;
+  background: rgba(251, 246, 234, 0.94);
+  border: 2px solid var(--accent);
+  border-radius: 3px;
+  padding: 48px 56px;
+  max-width: 700px;
+  width: 100%;
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.18);
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 2rem;
   text-align: center;
-  z-index: 2;
+}
+
+.hero-card::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border: 1px solid var(--accent);
+  border-radius: 1px;
+  pointer-events: none;
 }
 
 .hero__logo {
-  width: 720px;
-  max-width: 92vw;
+  width: 420px;
+  max-width: 100%;
   height: auto;
   display: block;
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
 }
 
 .hero__intro {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-style: italic;
-  font-size: 1.25rem;
-  color: #fff;
-  max-width: 560px;
+  font-size: 1.45rem;
+  font-weight: 600;
+  font-style: normal;
+  color: var(--text);
   line-height: 1.7;
   margin: 0;
 }
@@ -184,7 +259,7 @@ body {
 .search-view {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 8rem 2.5rem 4rem; /* top clears fixed 110px header with breathing room */
+  padding: 10rem 2.5rem 4rem; /* top clears fixed 140px header with breathing room */
 }
 
 /* ── Search form ── */
@@ -622,6 +697,7 @@ body {
   pointer-events: none;
   user-select: none;
   line-height: 1;
+  z-index: 3;
 }
 
 .moodboard-thumb__remove {
@@ -642,11 +718,13 @@ body {
   justify-content: center;
   opacity: 0;
   transition: opacity 0.15s;
+  z-index: 4;
 }
 
 .moodboard-thumb:hover .moodboard-thumb__remove {
   opacity: 1;
 }
+
 
 /* ── Download / Share buttons ── */
 
@@ -868,15 +946,27 @@ body {
 /* ── Responsive ── */
 
 @media (max-width: 640px) {
-  /* Sticky header logo: scale down on mobile */
+  /* Sticky header logo on mobile */
   .app-logo--sticky {
-    height: 50px;
-    max-width: 260px;
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  .app-header {
+    min-height: 70px;
+  }
+
+  /* Hero card: tighter padding on mobile */
+  .hero-card {
+    padding: 32px 28px;
+    max-width: calc(100vw - 2rem);
   }
 
   /* Hero logo: scale down proportionally */
   .hero__logo {
-    width: 320px;
+    width: 240px;
     margin-bottom: 1.25rem;
   }
 
@@ -886,7 +976,7 @@ body {
 
   /* Search view: clears fixed header on top, FAB on bottom */
   .search-view {
-    padding: 6rem 1rem calc(88px + 1rem);
+    padding: 5.5rem 1rem calc(88px + 1rem);
   }
 
   /* FAB: safe-area inset for home-indicator devices */
@@ -974,6 +1064,109 @@ body {
   .hero__intro-secondary {
     font-size: 0.9rem;
   }
+
+  /* About page: tighter on mobile */
+  .about-page {
+    padding: 6rem 20px 2.5rem;
+  }
+
+  .about-heading {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .about-section__heading {
+    font-size: 1.1rem;
+  }
+
+  .about-section__body {
+    line-height: 1.6;
+  }
+
+  /* About link in header: collapse to icon on very small screens */
+  .app-header__about-link {
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+  }
+}
+
+@media (max-width: 360px) {
+  .app-header__about-link {
+    font-size: 0;
+    letter-spacing: 0;
+  }
+
+  .app-header__about-link::after {
+    content: '↗';
+    font-size: 1rem;
+    letter-spacing: 0;
+  }
+}
+
+/* ── About page ── */
+
+.about-page {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 10rem 2.5rem 6rem;
+}
+
+.about-page__back {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-bottom: 2.5rem;
+  transition: color 0.15s;
+}
+
+.about-page__back:hover {
+  color: var(--accent);
+}
+
+.about-heading {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 2.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  line-height: 1.15;
+  margin-bottom: 3rem;
+}
+
+.about-section {
+  margin-bottom: 2.5rem;
+}
+
+.about-section__heading {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.6rem;
+}
+
+.about-section__body {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  line-height: 1.75;
+}
+
+.about-section__body strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.about-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.about-link:hover {
+  color: var(--accent-hover);
 }
 
 /* ── Footer ── */
