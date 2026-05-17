@@ -13,6 +13,22 @@ app.use('/api/search', require('./routes/search'));
 app.use('/api/random', require('./routes/random'));
 app.use('/api/image-proxy', require('./routes/image-proxy'));
 
+// Temporary diagnostic endpoint — shows whether DB files exist on this server
+app.get('/api/debug', (req, res) => {
+  const dbPath = path.join(__dirname, '..', 'data', 'moodboard.sqlite');
+  const gzPath = path.join(__dirname, '..', 'data', 'moodboard.sqlite.snapshot.gz');
+  const stat = (p) => fs.existsSync(p) ? `${(fs.statSync(p).size / 1024 / 1024).toFixed(1)} MB` : 'MISSING';
+  res.json({
+    codeVersion: 3,
+    cwd: process.cwd(),
+    dbPath,
+    gzPath,
+    db: stat(dbPath),
+    gz: stat(gzPath),
+    nodeEnv: process.env.NODE_ENV,
+  });
+});
+
 if (process.env.NODE_ENV === 'production') {
   const distDir = path.join(__dirname, '..', 'dist');
   app.use(express.static(distDir));
