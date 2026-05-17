@@ -7,11 +7,16 @@ export default function HeroPage() {
 
   useEffect(() => {
     fetch('/api/random?limit=60')
-      .then((r) => r.json())
+      .then((r) => {
+        console.log('[HeroPage] /api/random status:', r.status);
+        return r.json();
+      })
       .then((data) => {
+        console.log('[HeroPage] raw response:', data);
         const artworks = (data.results || []).filter(
           (a) => a.primary_image_small || a.primary_image
         );
+        console.log('[HeroPage] images with URLs:', artworks.length);
         if (artworks.length === 0) return;
 
         // Distribute evenly across 3 strips — works even with < 60 results
