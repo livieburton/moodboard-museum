@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   DndContext,
   DragOverlay,
@@ -53,47 +53,12 @@ function SortableThumb({ artwork, number, onRemove, isActive }) {
   );
 }
 
-function ExportPreview({ artworks, title }) {
-  return (
-    <div className="export-preview">
-      <p className="export-preview__title">{title}</p>
-      <div className="export-preview__divider" />
-      <div className="export-preview__grid">
-        {artworks.map((artwork, i) => (
-          <div key={artwork.object_id} className="export-preview__thumb">
-            <img
-              src={artwork.primary_image_small || artwork.primary_image}
-              alt={artwork.title || 'Artwork'}
-            />
-            <span className="export-preview__badge">{i + 1}</span>
-          </div>
-        ))}
-      </div>
-      <div className="export-preview__divider" />
-      <ol className="export-preview__credits">
-        {artworks.map((artwork, i) => {
-          const parts = [artwork.artist_name, artwork.title || 'Untitled', 'The Met'].filter(Boolean);
-          return (
-            <li key={artwork.object_id}>
-              <span>{i + 1}. </span>
-              <em>{parts.join(' · ')}</em>
-            </li>
-          );
-        })}
-      </ol>
-      <img src="/logo2.png" alt="Moodboard Museum" className="export-preview__logo" />
-    </div>
-  );
-}
-
 export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose, isOpen, title, onTitleChange }) {
   const [activeId, setActiveId] = useState(null);
-  const [viewMode, setViewMode] = useState('grid');
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editValue, setEditValue] = useState(title);
 
   useEffect(() => {
-    if (!isEditingTitle) setEditValue(title);
+    setEditValue(title);
   }, [title]);
 
   const sensors = useSensors(
@@ -102,18 +67,13 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
   );
 
   function commitTitle() {
-    setIsEditingTitle(false);
     const saved = editValue.trim() || 'My Moodboard';
     setEditValue(saved);
     onTitleChange(saved);
   }
 
   function handleTitleKeyDown(e) {
-    if (e.key === 'Enter') commitTitle();
-    if (e.key === 'Escape') {
-      setIsEditingTitle(false);
-      setEditValue(title);
-    }
+    if (e.key === 'Enter' || e.key === 'Escape') e.target.blur();
   }
 
   function handleDragStart({ active }) {
@@ -143,10 +103,8 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
     const GAP = 10;
     const COL_W = Math.floor((CANVAS_W - PAD * 2 - GAP * (COLS - 1)) / COLS);
 
-    // Load Cormorant Garamond for title; fall back to Georgia if unavailable
     try { await document.fonts.load('600 56px "Cormorant Garamond"'); } catch (e) {}
 
-    // Load artwork images and logo2 concurrently
     const [loaded, logoImg] = await Promise.all([
       Promise.all(
         artworks.map((artwork) =>
@@ -163,11 +121,10 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
         const img = new Image();
         img.onload = () => resolve(img);
         img.onerror = () => resolve(null);
-        img.src = '/logo2.png';
+        img.src = '/logo2.svg';
       }),
     ]);
 
-    // Shortest-column masonry — natural aspect ratios, no cropping
     const colHeights = Array(COLS).fill(0);
     const placements = [];
     for (const { img, artwork } of loaded) {
@@ -181,10 +138,9 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
     }
 
     const gridH = Math.max(...colHeights) - GAP;
-    const LOGO_W = 200;
+    const LOGO_W = 320;
     const logoH = logoImg ? Math.round((logoImg.naturalHeight / logoImg.naturalWidth) * LOGO_W) : 0;
 
-    // Dynamic layout — title → divider → grid → divider → credits → logo
     const TITLE_SIZE = 56;
     const CREDIT_LINE_H = 22;
     let y = PAD;
@@ -203,14 +159,12 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
     ctx.fillStyle = '#f7f5f2';
     ctx.fillRect(0, 0, CANVAS_W, canvas.height);
 
-    // Title
     ctx.font = '600 56px "Cormorant Garamond", Georgia, serif';
     ctx.fillStyle = '#1a1814';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
     ctx.fillText(title, PAD, titleY, CANVAS_W - PAD * 2);
 
-    // Top divider
     ctx.strokeStyle = '#e8e4de';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -218,12 +172,10 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
     ctx.lineTo(CANVAS_W - PAD, topDivY);
     ctx.stroke();
 
-    // Images
     for (const { img, x, y: iy, w, h } of placements) {
       ctx.drawImage(img, x, gridY + iy, w, h);
     }
 
-    // Number badges
     const BADGE_R = 11;
     placements.forEach(({ x, y: iy }, i) => {
       const bx = x + 8 + BADGE_R;
@@ -241,7 +193,6 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
       ctx.restore();
     });
 
-    // Bottom divider
     ctx.strokeStyle = '#e8e4de';
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -249,7 +200,6 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
     ctx.lineTo(CANVAS_W - PAD, botDivY);
     ctx.stroke();
 
-    // Credits
     placements.forEach(({ artwork }, i) => {
       const num = `${i + 1}.`;
       const parts = [artwork.artist_name, artwork.title || 'Untitled', 'The Met'].filter(Boolean);
@@ -263,7 +213,6 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
       ctx.fillText(parts.join(' · '), PAD + numW, creditsY + i * CREDIT_LINE_H);
     });
 
-    // Logo
     if (logoImg) {
       ctx.drawImage(logoImg, (CANVAS_W - LOGO_W) / 2, logoY, LOGO_W, logoH);
     }
@@ -285,8 +234,6 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
   async function shareMoodboard() {
     if (artworks.length === 0) return;
     const blob = await generateMoodboardBlob();
-    // Web Share API with file payload requires HTTPS — works on the deployed Railway
-    // URL but not on localhost. canShare() returns false locally; falls back to download.
     const file = new File([blob], 'moodboard.png', { type: 'image/png' });
     if (navigator.canShare({ files: [file] })) {
       await navigator.share({ files: [file], title });
@@ -309,12 +256,12 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
       <div className={`moodboard-backdrop${isOpen ? ' open' : ''}`} onClick={onClose} />
       <aside className={`moodboard-panel${isOpen ? ' open' : ''}`}>
         <div className="moodboard-panel__header">
-          <h2 className="moodboard-panel__title">
-            My Moodboard
+          <div className="moodboard-panel__title-group">
+            <img src="/btn-moodboard2.svg" alt="My Moodboard" className="moodboard-panel__title-img" />
             {artworks.length > 0 && (
               <span className="moodboard-panel__count">{artworks.length}</span>
             )}
-          </h2>
+          </div>
           <button className="moodboard-panel__close" onClick={onClose} aria-label="Close moodboard">
             ✕
           </button>
@@ -327,80 +274,69 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
             </p>
           ) : (
             <>
-              {isEditingTitle ? (
+              <div className="moodboard-title-row">
                 <input
                   className="moodboard-title-input"
                   value={editValue}
                   onChange={(e) => setEditValue(e.target.value)}
                   onBlur={commitTitle}
                   onKeyDown={handleTitleKeyDown}
-                  autoFocus
+                  placeholder="Name your moodboard…"
+                  aria-label="Moodboard title"
                 />
-              ) : (
-                <p
-                  className="moodboard-title"
-                  onClick={() => setIsEditingTitle(true)}
-                  title="Click to edit title"
-                >
-                  {title}
-                </p>
-              )}
-
-              <div className="moodboard-view-toggle">
-                <button
-                  className={`moodboard-view-toggle__btn${viewMode === 'grid' ? ' active' : ''}`}
-                  onClick={() => setViewMode('grid')}
-                >
-                  Grid view
-                </button>
-                <button
-                  className={`moodboard-view-toggle__btn${viewMode === 'preview' ? ' active' : ''}`}
-                  onClick={() => setViewMode('preview')}
-                >
-                  Export preview
-                </button>
+                <span className="moodboard-title-pencil" aria-hidden="true">✎</span>
               </div>
 
-              {viewMode === 'preview' ? (
-                <ExportPreview artworks={artworks} title={title} />
-              ) : (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
-                  onDragCancel={handleDragCancel}
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onDragCancel={handleDragCancel}
+              >
+                <SortableContext
+                  items={artworks.map((a) => a.object_id)}
+                  strategy={rectSortingStrategy}
                 >
-                  <SortableContext
-                    items={artworks.map((a) => a.object_id)}
-                    strategy={rectSortingStrategy}
-                  >
-                    <div className="moodboard-grid">
-                      {artworks.map((artwork, i) => (
-                        <SortableThumb
-                          key={artwork.object_id}
-                          artwork={artwork}
-                          number={i + 1}
-                          onRemove={onRemove}
-                          isActive={artwork.object_id === activeId}
-                        />
-                      ))}
+                  <div className="moodboard-grid">
+                    {artworks.map((artwork, i) => (
+                      <SortableThumb
+                        key={artwork.object_id}
+                        artwork={artwork}
+                        number={i + 1}
+                        onRemove={onRemove}
+                        isActive={artwork.object_id === activeId}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+                <DragOverlay>
+                  {activeArtwork && (
+                    <div className="moodboard-thumb moodboard-thumb--overlay">
+                      <img
+                        src={activeArtwork.primary_image_small || activeArtwork.primary_image}
+                        alt={activeArtwork.title || 'Artwork'}
+                        className="moodboard-thumb__img"
+                      />
+                      <span className="moodboard-thumb__number">{activeNumber}</span>
                     </div>
-                  </SortableContext>
-                  <DragOverlay>
-                    {activeArtwork && (
-                      <div className="moodboard-thumb moodboard-thumb--overlay">
-                        <img
-                          src={activeArtwork.primary_image_small || activeArtwork.primary_image}
-                          alt={activeArtwork.title || 'Artwork'}
-                          className="moodboard-thumb__img"
-                        />
-                        <span className="moodboard-thumb__number">{activeNumber}</span>
-                      </div>
-                    )}
-                  </DragOverlay>
-                </DndContext>
-              )}
+                  )}
+                </DragOverlay>
+              </DndContext>
+
+              <div className="moodboard-divider" />
+
+              <ol className="moodboard-credits">
+                {artworks.map((artwork, i) => {
+                  const parts = [artwork.artist_name, artwork.title || 'Untitled', 'The Met'].filter(Boolean);
+                  return (
+                    <li key={artwork.object_id} className="moodboard-credits__item">
+                      <span className="moodboard-credits__num">{i + 1}.</span>
+                      <em>{parts.join(' · ')}</em>
+                    </li>
+                  );
+                })}
+              </ol>
             </>
           )}
         </div>

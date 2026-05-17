@@ -79,15 +79,15 @@ export default function HeroPage() {
 
       <div className="hero-content">
         <div className="hero-card">
-          <img src="/logo1.png" alt="Moodboard Museum" className="hero__logo" />
+          <img src="/logo1.svg" alt="Moodboard Museum" className="hero__logo" />
           <p className="hero__intro">
             Every aesthetic has a visual history, and much of it is hanging in museums. Moodboard Museum helps you find it.
           </p>
           <p className="hero__intro">
             Every image here was made by a human.
           </p>
-          <button className="hero__cta" onClick={() => navigate('/explore')}>
-            Start exploring →
+          <button className="hero__cta hero__cta--img" onClick={() => navigate('/explore')} aria-label="Enter">
+            <img src="/btn-enter.svg" alt="Enter" className="hero__cta-img" />
           </button>
         </div>
       </div>

@@ -42,6 +42,11 @@ const ENRICH_DEPARTMENTS = [
   'Asian Art',
   'Greek and Roman Art',
   'The American Wing',
+  'Modern and Contemporary Art',
+  'Medieval Art',
+  'The Costume Institute',
+  'Photographs',
+  'European Paintings',
 ];
 
 // --- cache layer -----------------------------------------------------------

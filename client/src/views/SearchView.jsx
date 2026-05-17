@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import ThemePicker from '../components/ThemePicker';
 import ArtworkCard from '../components/ArtworkCard';
 import { listThemes, queryTheme, searchFreeText } from '../api';
@@ -42,7 +43,7 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
   async function handleSearch(e) {
     e.preventDefault();
     const q = searchInput.trim();
-    if (!q || searchInFlight.current) return;
+    if (!q || loading || searchInFlight.current) return;
     searchInFlight.current = true;
     if (onTitleChange) onTitleChange(q);
     setActiveSlug(null);
@@ -75,8 +76,11 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
           maxLength={200}
           disabled={loading}
         />
-        <button className="search-button" type="submit" disabled={loading || !searchInput.trim()}>
-          {loading && !activeSlug ? 'Searching…' : 'Search'}
+        <button className="search-button search-button--img" type="submit" disabled={loading} aria-label={loading && !activeSlug ? 'Searching' : 'Search'}>
+          {loading && !activeSlug
+            ? <span className="search-button__loading">Searching…</span>
+            : <img src="/btn-search.svg" alt="Search" className="search-button__img" />
+          }
         </button>
       </form>
 
@@ -109,7 +113,12 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
       )}
 
       {!loading && results === null && !error && (
-        <p className="state-message">Describe an aesthetic above, or pick a theme to explore the collection. Add images to your moodboard, then edit and download.</p>
+        <div className="idle-state">
+          <p className="state-message state-message--idle">Search an aesthetic. Build a moodboard.</p>
+          <Link to="/about" className="idle-about-btn">
+            <img src="/btn-about.svg" alt="About" className="idle-about-btn__img" />
+          </Link>
+        </div>
       )}
     </main>
   );

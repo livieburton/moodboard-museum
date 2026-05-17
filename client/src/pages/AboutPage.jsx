@@ -43,12 +43,12 @@ export default function AboutPage() {
       <section className="about-section">
         <h2 className="about-section__heading">The images</h2>
         <p className="about-section__body">
-          All images are CC0 (Creative Commons Zero). We include attribution anyway because artists deserve credit, and because knowing who made something is part of understanding it.
+          All images are Creative Commons Zero (CC0). We include attribution anyway because artists deserve credit, and because knowing who made something is part of understanding it.
         </p>
       </section>
 
       <section className="about-section">
-        <h2 className="about-section__heading">More museums coming</h2>
+        <h2 className="about-section__heading">Pardon our dust</h2>
         <p className="about-section__body">
           The Met is just the beginning. We're working on adding collections from the Art Institute of Chicago, the Rijksmuseum, the Smithsonian, and others. If you'd like to suggest a museum or contribute to the project, visit us on{' '}
           <a

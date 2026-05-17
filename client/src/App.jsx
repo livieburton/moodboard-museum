@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import HeroPage from './pages/HeroPage';
 import SearchView from './views/SearchView';
 import AboutPage from './pages/AboutPage';
 import MoodboardPanel from './components/MoodboardPanel';
+import ExploreBanner from './components/ExploreBanner';
 
 function AppShell() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isExplore = location.pathname === '/explore';
   const isAbout = location.pathname === '/about';
   const [moodboard, setMoodboard] = useState([]);
@@ -21,13 +23,15 @@ function AppShell() {
 
   useEffect(() => {
     function onScroll() {
-      setScrolled(window.scrollY > window.innerHeight * 0.85);
+      // On explore, header appears after the banner scrolls away (~320px)
+      const threshold = isExplore ? 320 : window.innerHeight * 0.85;
+      setScrolled(window.scrollY > threshold);
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [isExplore]);
 
-  const showHeader = isExplore || isAbout || scrolled;
+  const showHeader = isAbout || scrolled;
 
   function handleAdd(artwork) {
     setMoodboard((prev) =>
@@ -48,12 +52,14 @@ function AppShell() {
       <header className={`app-header${showHeader ? ' app-header--visible' : ''}`}>
         <div className="app-header__inner">
           <div className="app-header__side" />
-          <Link to="/" className="app-logo--sticky-link">
-            <img src="/logo2.png" alt="Moodboard Museum" className="app-logo--sticky" />
+          <Link
+            to={isExplore ? '/explore' : '/'}
+            className="app-logo--sticky-link"
+            onClick={isExplore ? () => window.scrollTo({ top: 0, behavior: 'smooth' }) : undefined}
+          >
+            <img src="/logo2.svg" alt="Moodboard Museum" className="app-logo--sticky" />
           </Link>
-          <div className="app-header__side app-header__side--right">
-            <Link to="/about" className="app-header__about-link">About</Link>
-          </div>
+          <div className="app-header__side app-header__side--right" />
         </div>
       </header>
 
@@ -64,13 +70,14 @@ function AppShell() {
           path="/explore"
           element={
             <>
+              <ExploreBanner />
               <SearchView
                 onAddToMoodboard={handleAdd}
                 moodboard={moodboard}
                 onTitleChange={setPanelTitle}
               />
               <footer className="app-footer">
-                Moodboard Museum is designed for aesthetic inspiration, not historical research. Search terms may result in inappropriate or irrelevant images. For more context, follow image links to the museum website directly.
+                Moodboard Museum is designed for aesthetic inspiration, not historical research. Search terms may result in inappropriate or irrelevant images. For more on this project, visit the <Link to="/about" className="app-footer__link">About page</Link>. For more context on the art, follow image links to museum websites directly.
               </footer>
             </>
           }
@@ -78,16 +85,18 @@ function AppShell() {
       </Routes>
 
       {isExplore && !panelOpen && (
-        <button
-          className="moodboard-fab"
-          aria-label={`Open moodboard, ${moodboard.length} items`}
-          onClick={() => setPanelOpen(true)}
-        >
-          My Moodboard
-          {moodboard.length > 0 && (
-            <span className="moodboard-btn__badge">{moodboard.length}</span>
-          )}
-        </button>
+        <div className="fab-stack">
+          <button
+            className="fab-img-btn"
+            aria-label={`Open moodboard, ${moodboard.length} items`}
+            onClick={() => setPanelOpen(true)}
+          >
+            <img src="/btn-moodboard.svg" alt="My Moodboard" className="fab-img-btn__img" />
+            {moodboard.length > 0 && (
+              <span className="moodboard-btn__badge">{moodboard.length}</span>
+            )}
+          </button>
+        </div>
       )}
 
       <MoodboardPanel

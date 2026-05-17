@@ -236,22 +236,85 @@ body {
 }
 
 .hero__cta {
-  font-family: var(--sans);
-  font-size: 0.875rem;
-  color: #fff;
-  background: var(--accent);
-  border: 1px solid var(--accent);
-  border-radius: 999px;
-  padding: 0.65rem 1.5rem;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  letter-spacing: 0.06em;
   margin-top: 2rem;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.hero__cta:hover {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
+.hero__cta-img {
+  width: 200px;
+  max-width: calc(100% - 2rem);
+  height: auto;
+  display: block;
+  transition: opacity 0.15s ease;
+}
+
+.hero__cta:hover .hero__cta-img {
+  opacity: 0.85;
+}
+
+/* ── Explore banner ── */
+
+.explore-banner {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  background-color: #2d4a3e;
+}
+
+.explore-banner__strip {
+  display: flex;
+  height: 100%;
+  align-items: stretch;
+  gap: 6px;
+  width: max-content;
+}
+
+.explore-banner__strip--animated {
+  animation: mosaic-scroll 100s linear infinite;
+}
+
+.explore-banner__img {
+  height: 100%;
+  width: auto;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+}
+
+.explore-banner__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  z-index: 1;
+}
+
+.explore-banner__card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  background: rgba(251, 246, 234, 0.94);
+  border: 2px solid var(--accent);
+  border-radius: 3px;
+  padding: 20px 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+  text-decoration: none;
+}
+
+.explore-banner__logo {
+  width: 300px;
+  max-width: calc(100vw - 6rem);
+  height: auto;
+  display: block;
 }
 
 /* ── Search view ── */
@@ -259,7 +322,7 @@ body {
 .search-view {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 10rem 2.5rem 4rem; /* top clears fixed 140px header with breathing room */
+  padding: 2.5rem 2.5rem 4rem;
 }
 
 /* ── Search form ── */
@@ -296,28 +359,36 @@ body {
 }
 
 .search-button {
-  padding: 0.625rem 1.25rem;
-  border: 1px solid var(--accent);
-  border-radius: 2px;
-  background: var(--accent);
-  color: #fff;
-  font-family: var(--sans);
-  font-size: 0.875rem;
-  letter-spacing: 0.02em;
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.12s, border-color 0.12s;
-}
-
-.search-button:hover:not(:disabled) {
-  background: var(--accent-hover);
-  border-color: var(--accent-hover);
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+  transition: opacity 0.12s;
 }
 
 .search-button:disabled {
-  opacity: 0.5;
   cursor: default;
 }
+
+.search-button__img {
+  height: 44px;
+  width: auto;
+  display: block;
+}
+
+.search-button__loading {
+  display: flex;
+  align-items: center;
+  height: 44px;
+  padding: 0 1rem;
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
 
 /* ── Theme picker ── */
 
@@ -464,6 +535,37 @@ body {
   color: #8b2e2e;
 }
 
+.idle-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.idle-about-btn {
+  display: block;
+  margin-top: 28px;
+  transition: opacity 0.12s;
+}
+
+.idle-about-btn:hover {
+  opacity: 0.8;
+}
+
+.idle-about-btn__img {
+  width: 110px;
+  height: auto;
+  display: block;
+}
+
+.state-message--idle {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--accent);
+  padding: 3rem 2rem 0;
+  letter-spacing: 0.01em;
+}
+
 /* ── Add to moodboard button (on card) ── */
 
 .artwork-card__add {
@@ -519,6 +621,9 @@ body {
 }
 
 .moodboard-btn__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -526,11 +631,12 @@ body {
   height: 1.25rem;
   padding: 0 0.3rem;
   border-radius: 999px;
-  background: var(--accent);
+  background: #c0392b;
   color: #fff;
   font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: 700;
   line-height: 1;
+  pointer-events: none;
 }
 
 /* ── Moodboard panel ── */
@@ -574,18 +680,21 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1.5rem;
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
 }
 
-.moodboard-panel__title {
-  font-family: var(--serif);
-  font-size: 1.1rem;
-  font-weight: normal;
+.moodboard-panel__title-group {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
+}
+
+.moodboard-panel__title-img {
+  height: 72px;
+  width: auto;
+  display: block;
 }
 
 .moodboard-panel__count {
@@ -638,11 +747,13 @@ body {
   flex-shrink: 0;
 }
 
-/* ── Moodboard thumbnail grid (masonry via CSS columns) ── */
+/* ── Moodboard thumbnail grid — 3 columns, matches export layout ── */
 
 .moodboard-grid {
-  column-count: 4;
-  column-gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 0;
 }
 
 .moodboard-thumb {
@@ -651,8 +762,6 @@ body {
   border-radius: 2px;
   border: 1px solid var(--border);
   background: var(--bg);
-  break-inside: avoid;
-  margin-bottom: 0.5rem;
   cursor: grab;
 }
 
@@ -762,150 +871,75 @@ body {
   color: #fff;
 }
 
-@media (max-width: 1024px) {
-  .moodboard-grid {
-    column-count: 3;
-  }
-}
-
 /* ── Editable moodboard title ── */
 
-.moodboard-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: var(--text);
-  line-height: 1.2;
-  padding: 0.75rem 0 0.5rem;
+.moodboard-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.75rem 0 0;
   margin-bottom: 0.75rem;
   border-bottom: 1px solid var(--border);
-  cursor: pointer;
-  transition: color 0.12s;
-}
-
-.moodboard-title:hover {
-  color: var(--accent);
 }
 
 .moodboard-title-input {
   font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.4rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: var(--text);
-  line-height: 1.2;
-  width: 100%;
+  flex: 1;
   border: none;
-  border-bottom: 2px solid var(--accent);
   background: transparent;
   outline: none;
-  padding: 0.75rem 0 0.5rem;
-  margin-bottom: 0.75rem;
-  display: block;
+  padding: 0 0 0.4rem;
+  min-width: 0;
 }
 
-/* ── Grid / Export preview toggle ── */
-
-.moodboard-view-toggle {
-  display: flex;
-  border: 1px solid var(--border);
-  border-radius: 2px;
-  overflow: hidden;
-  margin-bottom: 1rem;
+.moodboard-title-input::placeholder {
+  color: var(--text-muted);
+  font-style: italic;
 }
 
-.moodboard-view-toggle__btn {
-  flex: 1;
-  padding: 0.35rem 0.5rem;
-  font-family: var(--sans);
-  font-size: 0.72rem;
-  letter-spacing: 0.03em;
-  border: none;
-  background: transparent;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: background 0.12s, color 0.12s;
-}
-
-.moodboard-view-toggle__btn + .moodboard-view-toggle__btn {
-  border-left: 1px solid var(--border);
-}
-
-.moodboard-view-toggle__btn.active {
-  background: var(--accent);
-  color: #fff;
-}
-
-/* ── Export preview (DOM approximation of the exported PNG) ── */
-
-.export-preview {
-  font-size: 0.8rem;
-}
-
-.export-preview__title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 1.3rem;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 0.5rem;
-  line-height: 1.2;
-}
-
-.export-preview__grid {
-  column-count: 3;
-  column-gap: 0.3rem;
-  margin-bottom: 0.5rem;
-}
-
-.export-preview__thumb {
-  position: relative;
-  break-inside: avoid;
-  margin-bottom: 0.3rem;
-}
-
-.export-preview__thumb img {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-.export-preview__badge {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 14px;
-  height: 14px;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.55);
-  color: #fff;
-  font-family: var(--serif);
-  font-size: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.moodboard-title-pencil {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  padding-bottom: 0.4rem;
+  flex-shrink: 0;
   pointer-events: none;
 }
 
-.export-preview__divider {
+/* ── Credits list in panel ── */
+
+.moodboard-divider {
   height: 1px;
   background: var(--border);
-  margin: 0.5rem 0;
+  margin: 0.75rem 0;
 }
 
-.export-preview__credits {
+.moodboard-credits {
   list-style: none;
   padding: 0;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
 }
 
-.export-preview__credits li {
-  font-size: 0.65rem;
+.moodboard-credits__item {
+  display: flex;
+  gap: 0.3rem;
+  font-size: 0.68rem;
   color: var(--text-secondary);
   line-height: 1.6;
 }
 
-.export-preview__credits em {
+.moodboard-credits__item em {
   font-style: italic;
 }
+
+.moodboard-credits__num {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+/* ── Export preview logo (kept for reference, unused) ── */
 
 .export-preview__logo {
   display: block;
@@ -913,34 +947,40 @@ body {
   margin: 0 auto 0.5rem;
 }
 
-/* ── Floating action button (moodboard, both desktop + mobile) ── */
+/* ── Floating action buttons ── */
 
-.moodboard-fab {
+.fab-stack {
   position: fixed;
   bottom: 28px;
   right: 28px;
   z-index: 100;
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 999px;
-  font-family: var(--sans);
-  font-size: 0.875rem;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22);
-  transition: background 0.12s, transform 0.12s;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
 }
 
-.moodboard-fab:hover {
-  background: var(--accent-hover);
+.fab-img-btn {
+  position: relative;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.28));
+  transition: opacity 0.12s, transform 0.12s;
+}
+
+.fab-img-btn:hover {
+  opacity: 0.88;
   transform: translateY(-1px);
+}
+
+.fab-img-btn__img {
+  width: 180px;
+  height: auto;
+  display: block;
 }
 
 /* ── Responsive ── */
@@ -974,16 +1014,23 @@ body {
     font-size: 1rem;
   }
 
-  /* Search view: clears fixed header on top, FAB on bottom */
+  /* Search view: banner handles top spacing; FAB adds bottom padding */
   .search-view {
-    padding: 5.5rem 1rem calc(88px + 1rem);
+    padding: 1.5rem 1rem calc(88px + 1rem);
   }
 
-  /* FAB: safe-area inset for home-indicator devices */
-  .moodboard-fab {
-    bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
-    right: 20px;
+  .explore-banner {
+    height: 160px;
   }
+
+  .explore-banner__card {
+    padding: 14px 24px;
+  }
+
+  .explore-banner__logo {
+    width: 180px;
+  }
+
 
   /* Search form: full-width input, hide button (Enter submits) */
   .search-form {
@@ -991,8 +1038,17 @@ body {
     margin-bottom: 0.875rem;
   }
 
-  .search-button {
-    display: none;
+  .search-button__img {
+    height: 38px;
+  }
+
+  .fab-stack {
+    bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+    right: 20px;
+  }
+
+  .fab-img-btn__img {
+    width: 140px;
   }
 
   /* Theme pills: single-row horizontal scroll with right-edge fade */
@@ -1047,7 +1103,7 @@ body {
 
   /* 2-column moodboard grid on mobile */
   .moodboard-grid {
-    column-count: 2;
+    grid-template-columns: repeat(2, 1fr);
   }
 
   /* Remove button always visible on touch devices */
@@ -1167,6 +1223,12 @@ body {
 
 .about-link:hover {
   color: var(--accent-hover);
+}
+
+.cc0 {
+  font-family: var(--sans);
+  font-variant-numeric: lining-nums;
+  letter-spacing: 0.03em;
 }
 
 /* ── Footer ── */

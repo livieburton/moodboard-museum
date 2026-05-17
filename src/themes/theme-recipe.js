@@ -306,6 +306,23 @@ const EXAMPLE_RECIPES = {
     source: 'curated',
   },
 
+  'mid-century-modern': {
+    label: 'Mid-Century Modern',
+    description: 'Clean lines and organic forms — American design objects from the postwar decades.',
+    filters: {
+      departments: ['The American Wing'],
+      tags: ['Furniture', 'Chairs', 'Tables', 'Ceramics', 'Glass', 'Textiles',
+        'Lamps', 'Desks', 'Sofas', 'Clocks', 'Vases'],
+      mediumKeywords: ['teak', 'walnut', 'fiberglass', 'aluminum', 'chrome',
+        'plywood', 'birch', 'wool', 'foam', 'plastic', 'rosewood', 'maple'],
+      dateRange: { start: 1940, end: 1975 },
+      excludeTags: ['Battle', 'Military', 'Portraits', 'Nudes', 'Mythology',
+        'Landscapes', 'Paintings'],
+    },
+    rationale: ['The American Wing', 'From 1940 to 1975', 'Furniture, ceramics, glass, and textiles', 'Made with teak, walnut, fiberglass, or aluminum'],
+    source: 'curated',
+  },
+
   'millennial-pink': {
     label: 'Millennial Pink',
     description: 'Soft pink and rose tones — flowers, feminine subjects, soft interiors.',
