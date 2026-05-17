@@ -7,6 +7,7 @@ app.use(express.json());
 
 app.use('/api/themes', require('./routes/themes'));
 app.use('/api/search', require('./routes/search'));
+app.use('/api/random', require('./routes/random'));
 app.use('/api/image-proxy', require('./routes/image-proxy'));
 
 if (process.env.NODE_ENV === 'production') {

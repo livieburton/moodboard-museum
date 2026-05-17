@@ -25,20 +25,109 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Header ── */
+/* ── Sticky header (hidden in hero, fades in on scroll) ── */
 
 .app-header {
-  padding: 1.5rem 2.5rem;
-  border-bottom: 1px solid var(--border);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  padding: 0.75rem 2.5rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
 }
 
-.app-logo {
-  height: 48px;
-  width: auto;
+.app-header--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.app-logo--sticky {
+  width: 140px;
+  height: auto;
   display: block;
+}
+
+/* ── Hero section ── */
+
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 5rem 2rem 4rem;
+  gap: 2rem;
+  text-align: center;
+}
+
+.hero__logo {
+  width: 480px;
+  max-width: 80vw;
+  height: auto;
+  display: block;
+}
+
+.hero__intro {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  max-width: 560px;
+  line-height: 1.75;
+  margin: 0;
+}
+
+.hero__cta {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  color: var(--accent);
+  text-decoration: none;
+  letter-spacing: 0.06em;
+  transition: opacity 0.15s;
+}
+
+.hero__cta:hover {
+  opacity: 0.65;
+}
+
+/* ── Hero art mosaic ── */
+
+.hero-mosaic {
+  width: 100%;
+  height: 260px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+}
+
+.hero-mosaic__track {
+  display: flex;
+  height: 100%;
+  gap: 8px;
+  width: max-content;
+  animation: mosaic-scroll 40s linear infinite;
+}
+
+.hero-mosaic__img {
+  height: 100%;
+  width: auto;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+}
+
+@keyframes mosaic-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
 
 /* ── Search view ── */
@@ -700,13 +789,22 @@ body {
 /* ── Responsive ── */
 
 @media (max-width: 640px) {
-  /* Header: centered logo, scaled to ~60% */
-  .app-header {
-    padding: 0.75rem 1rem;
+  /* Sticky header logo: scale down on mobile */
+  .app-logo--sticky {
+    width: 90px;
   }
 
-  .app-logo {
-    height: 29px; /* 60% of 48px */
+  /* Hero logo: scale down proportionally */
+  .hero__logo {
+    width: 260px;
+  }
+
+  .hero__intro {
+    font-size: 1rem;
+  }
+
+  .hero-mosaic {
+    height: 180px;
   }
 
   /* Search view: compressed top, extra bottom clears the 56px bar */

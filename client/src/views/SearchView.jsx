@@ -63,7 +63,7 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
   }
 
   return (
-    <main className="search-view">
+    <main className="search-view" id="search">
       <form className="search-form" onSubmit={handleSearch}>
         <input
           ref={inputRef}
