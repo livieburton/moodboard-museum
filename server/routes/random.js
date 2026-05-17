@@ -12,7 +12,7 @@ router.get('/', async (req, res) => {
     const { db } = await openDb();
     const results = db.exec(`
       SELECT object_id, title, primary_image_small, primary_image
-      FROM artworks
+      FROM objects
       WHERE is_public_domain = 1
         AND object_id NOT IN (${BLOCKED_IDS.join(',')})
         AND (

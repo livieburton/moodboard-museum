@@ -37,27 +37,23 @@ async function queryTheme(recipeInput, { limit = DEFAULT_LIMIT } = {}) {
   const { recipe } = validation;
   const { db } = await openDb();
 
-  try {
-    const { sql, params } = buildQuery(recipe.filters, limit);
-    const rows = execQuery(db, sql, params);
-    const matchReason = recipe.rationale.join(' · ');
+  const { sql, params } = buildQuery(recipe.filters, limit);
+  const rows = execQuery(db, sql, params);
+  const matchReason = recipe.rationale.join(' · ');
 
-    return {
-      theme: recipe.label,
-      description: recipe.description,
-      rationale: recipe.rationale,
+  return {
+    theme: recipe.label,
+    description: recipe.description,
+    rationale: recipe.rationale,
+    matchReason,
+    count: rows.length,
+    results: rows.map((row) => ({
+      ...row,
+      tags: row.tags ? row.tags.split('|') : [],
       matchReason,
-      count: rows.length,
-      results: rows.map((row) => ({
-        ...row,
-        tags: row.tags ? row.tags.split('|') : [],
-        matchReason,
-      })),
-      warnings: validation.warnings || [],
-    };
-  } finally {
-    db.close();
-  }
+    })),
+    warnings: validation.warnings || [],
+  };
 }
 
 function buildQuery(filters, limit) {

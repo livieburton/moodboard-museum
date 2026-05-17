@@ -13,31 +13,6 @@ app.use('/api/search', require('./routes/search'));
 app.use('/api/random', require('./routes/random'));
 app.use('/api/image-proxy', require('./routes/image-proxy'));
 
-// Temporary diagnostic endpoint
-app.get('/api/debug', async (req, res) => {
-  const dbPath = path.join(__dirname, '..', 'data', 'moodboard.sqlite');
-  const gzPath = path.join(__dirname, '..', 'data', 'moodboard.sqlite.snapshot.gz');
-  const stat = (p) => fs.existsSync(p) ? `${(fs.statSync(p).size / 1024 / 1024).toFixed(1)} MB` : 'MISSING';
-
-  let tables = null;
-  let dbError = null;
-  try {
-    const { openDb } = require('../src/pipeline/db');
-    const { db } = await openDb();
-    const result = db.exec("SELECT name FROM sqlite_master WHERE type='table'");
-    tables = result.length ? result[0].values.map(r => r[0]) : [];
-  } catch (e) {
-    dbError = e.message;
-  }
-
-  res.json({
-    codeVersion: 4,
-    db: stat(dbPath),
-    gz: stat(gzPath),
-    tables,
-    dbError,
-  });
-});
 
 if (process.env.NODE_ENV === 'production') {
   const distDir = path.join(__dirname, '..', 'dist');
