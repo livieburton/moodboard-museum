@@ -17,18 +17,20 @@ const BLOCKED_OBJECT_IDS = [
   11116,  // "Dressing for the Carnival" — Winslow Homer; depicts Black Americans in a way that reads as slavery imagery without context
 ];
 
-const DEFAULT_LIMIT = 50;
+const RETURN_LIMIT = 50;
+const FETCH_LIMIT = 250; // fetch a larger pool so diversification has material to work with
+const DIVERSIFY_THRESHOLD = 10;
 
 /**
  * Run a theme query against the database.
  *
  * @param {object} recipeInput   - Raw recipe object (will be validated).
  * @param {object} [options]
- * @param {number} [options.limit=50] - Max results to return.
+ * @param {number} [options.limit=50] - Max results to return after diversification.
  * @returns {Promise<object>}    - { theme, description, rationale, matchReason,
  *                                   count, results, warnings }
  */
-async function queryTheme(recipeInput, { limit = DEFAULT_LIMIT } = {}) {
+async function queryTheme(recipeInput, { limit = RETURN_LIMIT } = {}) {
   const validation = validateRecipe(recipeInput);
   if (!validation.valid) {
     throw new Error(`Invalid recipe: ${validation.errors.join('; ')}`);
@@ -37,23 +39,122 @@ async function queryTheme(recipeInput, { limit = DEFAULT_LIMIT } = {}) {
   const { recipe } = validation;
   const { db } = await openDb();
 
-  const { sql, params } = buildQuery(recipe.filters, limit);
+  const { sql, params } = buildQuery(recipe.filters, FETCH_LIMIT);
   const rows = execQuery(db, sql, params);
   const matchReason = recipe.rationale.join(' · ');
+
+  const diversified = diversify(rows, limit);
 
   return {
     theme: recipe.label,
     description: recipe.description,
     rationale: recipe.rationale,
     matchReason,
-    count: rows.length,
-    results: rows.map((row) => ({
+    count: diversified.length,
+    results: diversified.map((row) => ({
       ...row,
       tags: row.tags ? row.tags.split('|') : [],
       matchReason,
     })),
     warnings: validation.warnings || [],
   };
+}
+
+// --- diversification --------------------------------------------------------
+
+function shuffle(arr) {
+  const out = [...arr];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+/**
+ * Coarsen medium/classification into a small set of buckets so the
+ * round-robin can enforce medium variety without needing to know every
+ * possible medium string in the Met's data.
+ */
+function mediumBucket(row) {
+  const cls = (row.classification || '').toLowerCase();
+  const med = (row.medium || '').toLowerCase();
+  if (cls.includes('painting')) return 'painting';
+  if (cls.includes('photograph')) return 'photograph';
+  if (cls.includes('sculpture') || cls.includes('ceramic') ||
+      cls.includes('glass') || cls.includes('metal') ||
+      cls.includes('textile') || cls.includes('furniture')) return 'object';
+  if (/engraving|etching|lithograph|woodcut|mezzotint|aquatint/.test(med) ||
+      cls.includes('print')) return 'print';
+  if (/chalk|charcoal|pencil|wash|pastel/.test(med) ||
+      cls.includes('drawing')) return 'drawing';
+  return 'other';
+}
+
+/**
+ * Normalize a title to a short subject key so that works depicting the
+ * same person or scene cluster together. Strips common portrait prefixes,
+ * punctuation, and truncates to 28 chars.
+ */
+function subjectKey(row, index) {
+  const raw = (row.title || '').trim();
+  if (!raw) return `__notitle_${index}`;
+  const normalized = raw
+    .replace(/^(portrait of|study of|head of|bust of|figure of|effigy of|sketch of)\s+/i, '')
+    .replace(/[,;:()\[\]'"]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase()
+    .slice(0, 28);
+  return normalized || `__notitle_${index}`;
+}
+
+/**
+ * Reorder rows so results feel varied from the first screen.
+ *
+ * Groups by a composite (subject, medium) key so that:
+ *   - The same subject (e.g. Mary Queen of Scots) never runs consecutively
+ *     regardless of how many different artists depicted her
+ *   - The same medium (e.g. print/engraving) doesn't dominate the first page
+ *     even when prints vastly outnumber paintings in the match set
+ *
+ * Round-robin takes one artwork from each group per pass, skipping exhausted
+ * groups, so the first screen is maximally varied and later results degrade
+ * naturally as smaller groups run out.
+ */
+function diversify(rows, returnLimit) {
+  if (rows.length <= DIVERSIFY_THRESHOLD) {
+    return shuffle(rows).slice(0, returnLimit);
+  }
+
+  // Build composite (subject, medium) groups.
+  const groupMap = new Map();
+  rows.forEach((row, i) => {
+    const key = `${subjectKey(row, i)}|${mediumBucket(row)}`;
+    if (!groupMap.has(key)) groupMap.set(key, []);
+    groupMap.get(key).push(row);
+  });
+
+  // Shuffle within each group, then shuffle group order.
+  const groups = shuffle([...groupMap.values()].map((g) => shuffle(g)));
+
+  // Round-robin: one from each group per pass, skip exhausted groups.
+  const result = [];
+  const cursors = groups.map(() => 0);
+
+  outer: while (true) {
+    let anyAdded = false;
+    for (let i = 0; i < groups.length; i++) {
+      if (cursors[i] < groups[i].length) {
+        result.push(groups[i][cursors[i]++]);
+        anyAdded = true;
+        if (result.length >= returnLimit) break outer;
+      }
+    }
+    if (!anyAdded) break;
+  }
+
+  return result;
 }
 
 function buildQuery(filters, limit) {

@@ -325,30 +325,33 @@ const EXAMPLE_RECIPES = {
 
   'millennial-pink': {
     label: 'Millennial Pink',
-    description: 'Soft pink and rose tones — flowers, feminine subjects, soft interiors.',
+    description: 'Soft pink and rose tones — roses, peonies, feminine subjects, and soft interiors.',
     filters: {
       classifications: ['Paintings', 'Prints', 'Drawings'],
-      tags: ['Flowers', 'Women', 'Interiors', 'Still Life', 'Gardens'],
+      tags: ['Roses', 'Peonies', 'Poppies', 'Flowers', 'Women', 'Interiors', 'Still Life', 'Gardens'],
       mediumKeywords: ['oil', 'watercolor', 'pastel'],
       dateRange: { start: 1750, end: 1920 },
       excludeTags: ['Battle', 'Military', 'Death', 'Nudes', 'Men', 'Boys',
-        'Soldiers', 'Mythology', 'Architecture'],
+        'Soldiers', 'Mythology', 'Architecture',
+        'Night', 'Storms', 'Water', 'Seascapes', 'Winter', 'Snow', 'Rain'],
     },
-    rationale: ['Paintings, prints, and drawings', 'From 1750 to 1920', 'Tagged with Flowers, Women, Interiors, or Still Life', 'Made with oil, watercolor, or pastel'],
+    rationale: ['Paintings, prints, and drawings', 'From 1750 to 1920', 'Tagged with Roses, Peonies, Poppies, or Flowers', 'Excluding cool-toned and dark scenes'],
     source: 'curated',
   },
 
   'moody-blues': {
     label: 'Moody Blues',
-    description: 'Deep blues and night tones — seascapes, night scenes, atmospheric landscapes.',
+    description: 'Deep blues and night tones — seascapes, moonlit skies, atmospheric ink landscapes.',
     filters: {
-      classifications: ['Paintings', 'Prints'],
-      tags: ['Water', 'Sky', 'Night', 'Seascapes', 'Waves', 'Rain', 'Storms', 'Moonlight'],
-      mediumKeywords: ['oil', 'woodblock', 'engraving'],
+      classifications: ['Paintings', 'Prints', 'Ceramics'],
+      tags: ['Water', 'Sky', 'Night', 'Seascapes', 'Waves', 'Rain', 'Storms',
+        'Moonlight', 'Moon', 'Mountains', 'Snow', 'Winter'],
+      mediumKeywords: ['oil', 'woodblock', 'engraving', 'blue', 'ink'],
       dateRange: { start: 1600, end: 1920 },
-      excludeTags: ['Battle', 'Military', 'Portraits', 'Nudes', 'Mythology'],
+      excludeTags: ['Battle', 'Military', 'Portraits', 'Nudes', 'Mythology',
+        'Autumn', 'Harvest', 'Flowers', 'Gardens'],
     },
-    rationale: ['Paintings and prints', 'From 1600 to 1920', 'Tagged with Water, Sky, Night, or Seascapes'],
+    rationale: ['Paintings, prints, and ceramics', 'From 1600 to 1920', 'Tagged with Water, Night, Moon, Mountains, or Seascapes', 'Including blue-and-white ceramics and Japanese woodblocks'],
     source: 'curated',
   },
 
@@ -400,15 +403,16 @@ const EXAMPLE_RECIPES = {
   // Color themes v1 — tag-based. Phase 2: replace with pixel-based hex color extraction.
   'earthy-tones': {
     label: 'Earthy Tones',
-    description: 'Terracotta, ochre, and warm browns — still lifes, landscapes, and ceramics.',
+    description: 'Terracotta, ochre, and warm browns — still lifes, harvest scenes, and ceramics.',
     filters: {
       classifications: ['Paintings', 'Ceramics', 'Prints'],
-      tags: ['Landscapes', 'Still Life', 'Pottery', 'Farms', 'Fields', 'Earth'],
-      mediumKeywords: ['oil', 'watercolor', 'terracotta'],
-      dateRange: { start: 1600, end: 1920 },
-      excludeTags: ['Battle', 'Military', 'Nudes', 'Mythology', 'Death'],
+      tags: ['Still Life', 'Pottery', 'Autumn', 'Harvest', 'Farms', 'Fields', 'Earth', 'Flowers'],
+      mediumKeywords: ['oil', 'watercolor', 'terracotta', 'earthenware', 'stoneware', 'bronze', 'copper'],
+      dateRange: { start: 1400, end: 1920 },
+      excludeTags: ['Battle', 'Military', 'Nudes', 'Mythology', 'Death',
+        'Snow', 'Winter', 'Night', 'Water', 'Seascapes', 'Waves', 'Rain'],
     },
-    rationale: ['Paintings, ceramics, and prints', 'From 1600 to 1920', 'Tagged with Landscapes, Still Life, or Pottery'],
+    rationale: ['Paintings, ceramics, and prints', 'Tagged with Still Life, Autumn, Harvest, or Pottery', 'Made with oil, terracotta, earthenware, bronze, or copper', 'Excluding cool-toned scenes'],
     source: 'curated',
   },
 
