@@ -113,7 +113,7 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
       )}
 
       {!loading && results === null && !error && (
-        <p className="state-message">Describe an aesthetic above, or pick a theme to explore the collection.</p>
+        <p className="state-message">Describe an aesthetic above, or pick a theme to explore the collection. Add images to your moodboard, then edit and download.</p>
       )}
     </main>
   );

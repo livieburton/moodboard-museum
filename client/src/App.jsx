@@ -6,7 +6,7 @@ function HeroMosaic() {
   const [items, setItems] = useState([]);
 
   useEffect(() => {
-    fetch('/api/random?limit=20')
+    fetch('/api/random?limit=24')
       .then((r) => r.json())
       .then((data) => {
         const artworks = (data.results || []).filter(
@@ -81,7 +81,10 @@ export default function App() {
       <section className="hero">
         <img src="/logo1.png" alt="Moodboard Museum" className="hero__logo" />
         <p className="hero__intro">
-          The world's great museums have made thousands of artworks freely available. Moodboard Museum makes them searchable by aesthetic — so your next moodboard is built from real art, not generated images.
+          Every aesthetic has a visual history, and much of it is hanging in museums. Moodboard Museum helps you find it.
+        </p>
+        <p className="hero__intro-secondary">
+          Every image here was made by a human.
         </p>
         <HeroMosaic />
         <a href="#search" className="hero__cta" onClick={scrollToSearch}>
@@ -90,19 +93,16 @@ export default function App() {
       </section>
 
       {!panelOpen && (
-        <div
-          className="mobile-moodboard-bar"
-          role="button"
-          tabIndex={0}
+        <button
+          className="moodboard-fab"
           aria-label={`Open moodboard, ${moodboard.length} items`}
           onClick={() => setPanelOpen(true)}
-          onKeyDown={(e) => e.key === 'Enter' && setPanelOpen(true)}
         >
-          <span className="mobile-moodboard-bar__label">My Moodboard</span>
+          My Moodboard
           {moodboard.length > 0 && (
             <span className="moodboard-btn__badge">{moodboard.length}</span>
           )}
-        </div>
+        </button>
       )}
 
       <SearchView

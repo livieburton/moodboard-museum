@@ -50,7 +50,7 @@ body {
 }
 
 .app-logo--sticky {
-  width: 140px;
+  width: 260px;
   height: auto;
   display: block;
 }
@@ -84,6 +84,16 @@ body {
   max-width: 560px;
   line-height: 1.75;
   margin: 0;
+}
+
+.hero__intro-secondary {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--text-muted);
+  max-width: 560px;
+  line-height: 1.75;
+  margin-top: 0.25rem;
 }
 
 .hero__cta {
@@ -780,10 +790,34 @@ body {
   margin: 0 auto 0.5rem;
 }
 
-/* ── Sticky mobile bottom bar (hidden on desktop) ── */
+/* ── Floating action button (moodboard, both desktop + mobile) ── */
 
-.mobile-moodboard-bar {
-  display: none;
+.moodboard-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22);
+  transition: background 0.12s, transform 0.12s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.moodboard-fab:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
 }
 
 /* ── Responsive ── */
@@ -807,9 +841,15 @@ body {
     height: 180px;
   }
 
-  /* Search view: compressed top, extra bottom clears the 56px bar */
+  /* Search view: compressed top, extra bottom clears the FAB */
   .search-view {
-    padding: 0.875rem 1rem calc(56px + 1.25rem);
+    padding: 0.875rem 1rem calc(88px + 1rem);
+  }
+
+  /* FAB: safe-area inset for home-indicator devices */
+  .moodboard-fab {
+    bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
+    right: 20px;
   }
 
   /* Search form: full-width input, hide button (Enter submits) */
@@ -887,31 +927,9 @@ body {
     width: 100vw;
   }
 
-  /* Sticky bottom bar */
-  .mobile-moodboard-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 56px;
-    padding: 0 1.25rem;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.07);
-    z-index: 100;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-  }
-
-  .mobile-moodboard-bar__label {
-    font-family: var(--sans);
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    letter-spacing: 0.02em;
+  /* Hero intro secondary beat: slightly smaller on mobile */
+  .hero__intro-secondary {
+    font-size: 0.9rem;
   }
 }
 
