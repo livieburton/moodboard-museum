@@ -35,7 +35,7 @@ router.get('/', async (req, res) => {
     res.json({ results: artworks });
   } catch (err) {
     console.error('[random]', err.message);
-    res.status(500).json({ error: 'Failed to fetch random artworks' });
+    res.status(500).json({ error: 'Failed to fetch random artworks', detail: err.message });
   }
 });
 

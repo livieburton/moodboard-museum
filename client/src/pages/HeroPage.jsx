@@ -12,7 +12,7 @@ export default function HeroPage() {
         return r.json();
       })
       .then((data) => {
-        console.log('[HeroPage] raw response:', data);
+        console.log('[HeroPage] raw response:', JSON.stringify(data).slice(0, 300));
         const artworks = (data.results || []).filter(
           (a) => a.primary_image_small || a.primary_image
         );
