@@ -31,7 +31,7 @@ router.post('/', async (req, res) => {
 
     const results = data.results
       .filter((r) => r.is_public_domain === 1)
-      .map(({ is_public_domain: _, ...r }) => r);
+      .map(({ is_public_domain: _, ...r }) => ({ ...r, museum: 'The Met' }));
 
     res.json({
       theme: data.theme,

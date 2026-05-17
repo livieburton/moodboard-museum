@@ -50,84 +50,49 @@ body {
 }
 
 .app-logo--sticky {
-  width: 260px;
+  width: 280px;
   height: auto;
   display: block;
 }
 
-/* ── Hero section ── */
+/* ── Hero section — full-viewport three-strip mosaic ── */
 
 .hero {
-  min-height: 100vh;
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Three scrolling strips fill the full viewport as background */
+.hero-mosaic {
+  position: absolute;
+  inset: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg);
-  padding: 5rem 2rem 4rem;
-  gap: 2rem;
-  text-align: center;
 }
 
-.hero__logo {
-  width: 480px;
-  max-width: 80vw;
-  height: auto;
-  display: block;
-}
-
-.hero__intro {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-style: italic;
-  font-size: 1.2rem;
-  color: var(--text-secondary);
-  max-width: 560px;
-  line-height: 1.75;
-  margin: 0;
-}
-
-.hero__intro-secondary {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-style: italic;
-  font-size: 1rem;
-  color: var(--text-muted);
-  max-width: 560px;
-  line-height: 1.75;
-  margin-top: 0.25rem;
-}
-
-.hero__cta {
-  font-family: var(--sans);
-  font-size: 0.875rem;
-  color: var(--accent);
-  text-decoration: none;
-  letter-spacing: 0.06em;
-  transition: opacity 0.15s;
-}
-
-.hero__cta:hover {
-  opacity: 0.65;
-}
-
-/* ── Hero art mosaic ── */
-
-.hero-mosaic {
-  width: 100%;
-  height: 260px;
+.hero-strip {
+  flex: 1;
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
-  mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
 }
 
-.hero-mosaic__track {
+.hero-strip__track {
   display: flex;
   height: 100%;
-  gap: 8px;
+  gap: 6px;
   width: max-content;
-  animation: mosaic-scroll 40s linear infinite;
+  animation: mosaic-scroll 30s linear infinite;
 }
 
-.hero-mosaic__img {
+.hero-strip--reverse .hero-strip__track {
+  animation-direction: reverse;
+}
+
+.hero-mosaic:hover .hero-strip__track {
+  animation-play-state: paused;
+}
+
+.hero-strip__img {
   height: 100%;
   width: auto;
   object-fit: cover;
@@ -140,12 +105,73 @@ body {
   to   { transform: translateX(-50%); }
 }
 
+/* Semi-transparent overlay so text reads against any image combo */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.38);
+}
+
+/* Centered content on top of overlay */
+.hero-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  z-index: 1;
+}
+
+.hero__logo {
+  width: 420px;
+  max-width: 85vw;
+  height: auto;
+  display: block;
+  margin-bottom: 2rem;
+}
+
+.hero__intro {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-style: italic;
+  font-size: 1.25rem;
+  color: #fff;
+  max-width: 560px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.hero__intro + .hero__intro {
+  margin-top: 0.75rem;
+}
+
+.hero__cta {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  color: #fff;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+  padding: 0.65rem 1.5rem;
+  cursor: pointer;
+  letter-spacing: 0.06em;
+  margin-top: 2rem;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.hero__cta:hover {
+  background: #fff;
+  color: var(--accent);
+}
+
 /* ── Search view ── */
 
 .search-view {
   max-width: 1600px;
   margin: 0 auto;
-  padding: 2rem 2.5rem 4rem;
+  padding: 6rem 2.5rem 4rem; /* top clears fixed header (~80-90px) */
 }
 
 /* ── Search form ── */
@@ -319,6 +345,12 @@ body {
 .artwork-card__artist {
   font-size: 0.75rem;
   color: var(--text-muted);
+  margin-bottom: 0.2rem;
+}
+
+.artwork-card__museum {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
   margin-bottom: 0.625rem;
 }
 
@@ -794,8 +826,8 @@ body {
 
 .moodboard-fab {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: 28px;
+  right: 28px;
   z-index: 100;
   display: flex;
   align-items: center;
@@ -830,20 +862,17 @@ body {
 
   /* Hero logo: scale down proportionally */
   .hero__logo {
-    width: 260px;
+    width: 240px;
+    margin-bottom: 1.25rem;
   }
 
   .hero__intro {
     font-size: 1rem;
   }
 
-  .hero-mosaic {
-    height: 180px;
-  }
-
-  /* Search view: compressed top, extra bottom clears the FAB */
+  /* Search view: clears fixed header on top, FAB on bottom */
   .search-view {
-    padding: 0.875rem 1rem calc(88px + 1rem);
+    padding: 5rem 1rem calc(88px + 1rem);
   }
 
   /* FAB: safe-area inset for home-indicator devices */

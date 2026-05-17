@@ -1,7 +1,7 @@
 import { useState } from 'react';
 
 export default function ArtworkCard({ artwork, onAdd, isAdded }) {
-  const { title, artist_name, primary_image_small, primary_image, link_resource } = artwork;
+  const { title, artist_name, museum, primary_image_small, primary_image, link_resource } = artwork;
   const imgSrc = primary_image_small || primary_image;
   const [hidden, setHidden] = useState(false);
 
@@ -34,6 +34,7 @@ export default function ArtworkCard({ artwork, onAdd, isAdded }) {
       <div className="artwork-card__body">
         <p className="artwork-card__title">{title || '(untitled)'}</p>
         {artist_name && <p className="artwork-card__artist">{artist_name}</p>}
+        {museum && <p className="artwork-card__museum">{museum}</p>}
         {onAdd && (
           <button
             className={`artwork-card__add${isAdded ? ' added' : ''}`}

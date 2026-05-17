@@ -337,6 +337,35 @@ const EXAMPLE_RECIPES = {
     source: 'curated',
   },
 
+  'clean-girl': {
+    label: 'Clean Girl',
+    description: 'Minimal, luminous, effortless — spare compositions, natural subjects, and soft light.',
+    filters: {
+      classifications: ['Drawings', 'Prints', 'Photographs'],
+      tags: ['Women', 'Flowers', 'Still Life', 'Portraits'],
+      mediumKeywords: ['watercolor', 'pencil', 'silver'],
+      dateRange: { start: 1850, end: 1970 },
+      excludeTags: ['Battle', 'Military', 'Architecture', 'Death', 'Mythology', 'Nudes'],
+    },
+    rationale: ['Drawings, prints, and photographs', 'From 1850 to 1970', 'Tagged with Women, Flowers, Still Life, or Portraits', 'Spare, luminous compositions'],
+    source: 'curated',
+  },
+
+  'girlboss': {
+    label: 'Girlboss',
+    description: 'Female power and confidence — portraits of women who commanded rooms.',
+    filters: {
+      classifications: ['Paintings', 'Prints'],
+      tags: ['Women', 'Portraits', 'Queens', 'Goddesses'],
+      mediumKeywords: ['oil', 'engraving'],
+      dateRange: { start: 1400, end: 1920 },
+      excludeTags: ['Battle', 'Military', 'Nudes', 'Children', 'Infants',
+        'Mother and Child', 'Mothers'],
+    },
+    rationale: ['Paintings and prints', 'From 1400 to 1920', 'Tagged with Women, Portraits, Queens, or Goddesses', 'Excluding domestic and military subjects'],
+    source: 'curated',
+  },
+
 };
 
 module.exports = {

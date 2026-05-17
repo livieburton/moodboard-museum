@@ -5,11 +5,13 @@ const { EXAMPLE_RECIPES } = require('../../src/themes/theme-recipe');
 const router = express.Router();
 
 router.get('/', (_req, res) => {
-  const themes = Object.entries(EXAMPLE_RECIPES).map(([slug, recipe]) => ({
-    slug,
-    label: recipe.label,
-    description: recipe.description || null,
-  }));
+  const themes = Object.entries(EXAMPLE_RECIPES)
+    .map(([slug, recipe]) => ({
+      slug,
+      label: recipe.label,
+      description: recipe.description || null,
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label));
   res.json(themes);
 });
 
@@ -31,6 +33,7 @@ router.get('/:slug', async (req, res) => {
         object_id: r.object_id,
         title: r.title,
         artist_name: r.artist_name,
+        museum: 'The Met',
         primary_image: r.primary_image || null,
         primary_image_small: r.primary_image_small || null,
         link_resource: r.link_resource,

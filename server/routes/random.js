@@ -6,7 +6,7 @@ const { openDb } = require('../../src/pipeline/db');
 const BLOCKED_IDS = [11116];
 
 router.get('/', async (req, res) => {
-  const limit = Math.min(parseInt(req.query.limit) || 20, 50);
+  const limit = Math.min(parseInt(req.query.limit) || 20, 60);
 
   try {
     const { db } = await openDb();
