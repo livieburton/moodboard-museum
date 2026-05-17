@@ -12,16 +12,18 @@ export default function HeroPage() {
         const artworks = (data.results || []).filter(
           (a) => a.primary_image_small || a.primary_image
         );
-        const g0 = artworks.slice(0, 20);
-        const g1 = artworks.slice(20, 40);
-        const g2 = artworks.slice(40, 60);
-        setStrips([
-          [...g0, ...g0],
-          [...g1, ...g1],
-          [...g2, ...g2],
-        ]);
+        console.log('[HeroPage] loaded', artworks.length, 'images for mosaic');
+
+        if (artworks.length === 0) return;
+
+        // Distribute evenly across 3 strips — works even with < 60 results
+        const groups = [[], [], []];
+        artworks.forEach((a, i) => groups[i % 3].push(a));
+
+        // Duplicate each group so the CSS translateX(-50%) loop is seamless
+        setStrips(groups.map((g) => [...g, ...g]));
       })
-      .catch(() => {});
+      .catch((err) => console.error('[HeroPage] fetch failed:', err));
   }, []);
 
   const speeds = ['30s', '42s', '55s'];
