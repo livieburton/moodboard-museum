@@ -835,11 +835,10 @@ body {
 }
 
 
-/* ── Download / Share buttons ── */
+/* ── Download button ── */
 
 .moodboard-panel__footer {
   display: flex;
-  gap: 0.5rem;
 }
 
 .moodboard-download-btn {
@@ -859,16 +858,6 @@ body {
 .moodboard-download-btn:hover {
   background: var(--accent-hover);
   border-color: var(--accent-hover);
-}
-
-.moodboard-download-btn--secondary {
-  background: transparent;
-  color: var(--accent);
-}
-
-.moodboard-download-btn--secondary:hover {
-  background: var(--accent);
-  color: #fff;
 }
 
 /* ── Editable moodboard title ── */

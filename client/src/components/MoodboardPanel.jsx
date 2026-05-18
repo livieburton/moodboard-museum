@@ -231,23 +231,11 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
     URL.revokeObjectURL(url);
   }
 
-  async function shareMoodboard() {
-    if (artworks.length === 0) return;
-    const blob = await generateMoodboardBlob();
-    const file = new File([blob], 'moodboard.png', { type: 'image/png' });
-    if (navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title });
-    } else {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'moodboard.png';
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-  }
+  // TODO: Share feature — to be re-implemented as a multi-platform share menu
+  // (Pinterest, Twitter/X, Facebook, email, copy link). Future implementation
+  // should ideally include shareable moodboard URLs (e.g. /m/:id) so links
+  // point to a viewable moodboard page, not just the standalone PNG.
 
-  const canShare = typeof navigator !== 'undefined' && !!navigator.share && !!navigator.canShare;
   const activeArtwork = artworks.find((a) => a.object_id === activeId);
   const activeNumber = activeId ? artworks.findIndex((a) => a.object_id === activeId) + 1 : null;
 
@@ -343,15 +331,7 @@ export default function MoodboardPanel({ artworks, onRemove, onReorder, onClose,
 
         {artworks.length > 0 && (
           <div className="moodboard-panel__footer">
-            {canShare && (
-              <button className="moodboard-download-btn" onClick={shareMoodboard}>
-                Share
-              </button>
-            )}
-            <button
-              className={`moodboard-download-btn${canShare ? ' moodboard-download-btn--secondary' : ''}`}
-              onClick={downloadMoodboard}
-            >
+            <button className="moodboard-download-btn" onClick={downloadMoodboard}>
               Download as image
             </button>
           </div>

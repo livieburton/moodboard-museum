@@ -14,7 +14,8 @@
  *                  previously-blocked objects get a fresh attempt.
  *
  * Only objects in ENRICH_DEPARTMENTS are enriched. European Paintings is
- * excluded entirely — the Met restricts those image files and returns 403s.
+ * included — ~77% coverage is achievable; the remaining ~23% return 403s from
+ * the Met and are cached as null sentinels so they're never re-requested.
  *
  * THE CACHE is the important idea here. The Met's data barely changes, and an
  * artwork's image URL is stable. So we save every API response to a JSON file
@@ -47,6 +48,13 @@ const ENRICH_DEPARTMENTS = [
   'Costume Institute',
   'Photographs',
   'European Paintings',
+  'Egyptian Art',
+  'European Sculpture and Decorative Arts',
+  'Islamic Art',
+  'The Cloisters',
+  'Arts of Africa, Oceania, and the Americas',
+  'Ancient Near Eastern Art',
+  'Robert Lehman Collection',
 ];
 
 // --- cache layer -----------------------------------------------------------

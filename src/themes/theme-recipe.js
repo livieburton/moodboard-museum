@@ -25,6 +25,10 @@ const KNOWN_DEPARTMENTS = [
   'Modern and Contemporary Art', 'Medieval Art', 'Islamic Art',
   'Costume Institute', 'Photographs', 'The Cloisters',
   'Arms and Armor', 'Musical Instruments',
+  'European Sculpture and Decorative Arts',
+  'Arts of Africa, Oceania, and the Americas',
+  'Ancient Near Eastern Art',
+  'Robert Lehman Collection',
 ];
 
 // These tags are excluded from ALL searches regardless of recipe.
@@ -79,10 +83,12 @@ function validateRecipe(input) {
   const filters = {};
   filters.classifications = constrainTo(toStringArray(rawFilters.classifications, 'classifications'), KNOWN_CLASSIFICATIONS, 'classification');
   filters.departments = constrainTo(toStringArray(rawFilters.departments, 'departments'), KNOWN_DEPARTMENTS, 'department');
+  filters.excludeDepartments = constrainTo(toStringArray(rawFilters.excludeDepartments, 'excludeDepartments'), KNOWN_DEPARTMENTS, 'department');
   filters.tags = toStringArray(rawFilters.tags, 'tags');
   filters.cultures = toStringArray(rawFilters.cultures, 'cultures');
   filters.mediumKeywords = toStringArray(rawFilters.mediumKeywords, 'mediumKeywords');
   filters.excludeTags = toStringArray(rawFilters.excludeTags, 'excludeTags');
+  filters.titleKeywords = toStringArray(rawFilters.titleKeywords, 'titleKeywords');
   if (rawFilters.dateRange !== undefined) {
     const dr = rawFilters.dateRange;
     if (typeof dr !== 'object' || dr === null) {
@@ -139,12 +145,14 @@ function describeFilters(filters) {
   const reasons = [];
   if (filters.classifications) reasons.push(joinNicely(filters.classifications));
   if (filters.departments) reasons.push(`From the ${joinNicely(filters.departments)} department${filters.departments.length > 1 ? 's' : ''}`);
+  if (filters.excludeDepartments) reasons.push(`Excluding ${joinNicely(filters.excludeDepartments)}`);
   if (filters.dateRange) reasons.push(formatDateRange(filters.dateRange));
   if (filters.tags) reasons.push(`Tagged with ${joinNicely(filters.tags)}`);
   if (filters.cultures) reasons.push(`${joinNicely(filters.cultures)} in origin`);
   if (filters.mediumKeywords) reasons.push(`Made with ${joinNicely(filters.mediumKeywords)}`);
   if (filters.isHighlight) reasons.push('Curator-designated highlights');
   if (filters.excludeTags) reasons.push(`Excluding works tagged ${joinNicely(filters.excludeTags)}`);
+  if (filters.titleKeywords) reasons.push(`Title keywords: ${joinNicely(filters.titleKeywords)}`);
   return reasons;
 }
 
@@ -160,20 +168,24 @@ function formatDateRange({ start, end }) {
   return `From ${fmt(start)} to ${fmt(end)}`;
 }
 
+// Active themes — served by the API and displayed as theme pills.
 const EXAMPLE_RECIPES = {
   'dark-academia': {
     label: 'Dark Academia',
     description: 'Moody scholarship — old portraits, books, shadowed interiors.',
     filters: {
       classifications: ['Paintings', 'Drawings'],
-      tags: ['Portraits', 'Books', 'Architecture', 'Reading', 'Writing'],
+      tags: ['Portraits', 'Books', 'Reading', 'Writing'],
       mediumKeywords: ['oil', 'ink'],
       dateRange: { start: 1600, end: 1900 },
       excludeTags: ['Animals', 'Landscapes', 'Cattle', 'Pastoral', 'Children',
         'Infants', 'Mothers', 'Family', 'Family Groups', 'Mother and Child',
-        'American Civil War', 'George Washington', 'Soldiers', 'Military'],
+        'American Civil War', 'George Washington', 'Soldiers', 'Military',
+        'Columns', 'Ornament'],
+      titleKeywords: ['library', 'reading', 'reader', 'scholar',
+        'manuscript', 'book', 'candlelight'],
     },
-    rationale: ['Oil paintings and drawings', 'From 1600 to 1900', 'Tagged with Portraits, Books, Reading, or Writing', 'Excluding pastoral, military, and family scenes'],
+    rationale: ['Oil paintings and drawings', 'From 1600 to 1900', 'Tagged with Portraits, Books, Reading, or Writing', 'Excluding architectural studies, pastoral, and military scenes'],
     source: 'curated',
   },
 
@@ -185,10 +197,11 @@ const EXAMPLE_RECIPES = {
       tags: ['Landscapes', 'Flowers', 'Gardens', 'Animals', 'Farms', 'Sheep', 'Birds'],
       mediumKeywords: ['oil', 'watercolor', 'woodblock'],
       dateRange: { start: 1700, end: 1920 },
-      excludeTags: ['Nudes', 'Mythology', 'Venus', 'Cupid', 'Battle',
-        'Military', 'American Civil War'],
+      excludeDepartments: ['Asian Art'],
+      excludeTags: ['Nudes', 'Mythology', 'Venus', 'Cupid', 'Battle', 'Military', 'American Civil War'],
+      titleKeywords: ['cottage', 'garden', 'meadow', 'farm', 'pastoral', 'rural', 'wildflower', 'herbs'],
     },
-    rationale: ['Paintings and prints', 'From 1700 to 1920', 'Tagged with Landscapes, Flowers, Gardens, or Animals'],
+    rationale: ['Paintings and prints', 'From 1700 to 1920', 'Tagged with Landscapes, Flowers, Gardens, or Animals', 'Excluding Asian Art'],
     source: 'curated',
   },
 
@@ -198,12 +211,13 @@ const EXAMPLE_RECIPES = {
     filters: {
       classifications: ['Drawings', 'Prints'],
       tags: ['Insects', 'Plants', 'Animals', 'Flowers', 'Birds', 'Snails',
-        'Frogs', 'Spiders', 'Dragonflies', 'Butterflies', 'Lizards'],
+        'Frogs', 'Spiders', 'Dragonflies', 'Butterflies', 'Lizards', 'Forests'],
       mediumKeywords: ['ink', 'engraving', 'etching', 'woodblock'],
       dateRange: { start: 1500, end: 1900 },
-      excludeTags: ['Battle', 'Military', 'Portraits', 'Mythology', 'Certificates', 'Documents', 'Calligraphy'],
+      excludeTags: ['Battle', 'Military', 'Portraits', 'Mythology', 'Documents', 'Calligraphy'],
+      titleKeywords: ['forest', 'woods', 'mushroom', 'fungi', 'toad', 'frog', 'moss', 'root', 'undergrowth'],
     },
-    rationale: ['Drawings and prints', 'From 1500 to 1900', 'Tagged with Insects, Plants, Snails, Frogs, or Butterflies', 'Made with ink, engraving, or etching'],
+    rationale: ['Drawings and prints', 'From 1500 to 1900', 'Tagged with Insects, Plants, Forests, Frogs, or Snails', 'Made with ink, engraving, or etching'],
     source: 'curated',
   },
 
@@ -232,6 +246,7 @@ const EXAMPLE_RECIPES = {
       mediumKeywords: ['ink', 'engraving', 'etching'],
       dateRange: { start: 1400, end: 1800 },
       excludeTags: ['Battle', 'Military', 'Portraits'],
+      titleKeywords: ['moon', 'night', 'witch', 'spell', 'ritual', 'occult', 'tarot', 'magic', 'incantation'],
     },
     rationale: ['Drawings and prints', 'From 1400 to 1800', 'Tagged with Witches, Skulls, Demons, Moon, or Owls', 'Made with ink, engraving, or etching'],
     source: 'curated',
@@ -244,10 +259,13 @@ const EXAMPLE_RECIPES = {
       classifications: ['Paintings', 'Prints'],
       tags: ['Seascapes', 'Ships', 'Waves', 'Fishing', 'Beaches', 'Boats', 'Sailors'],
       mediumKeywords: ['oil', 'watercolor', 'woodblock'],
-      dateRange: { start: 1700, end: 1920 },
-      excludeTags: ['Battle', 'Military', 'Soldiers', 'Nudes', 'Mythology'],
+      excludeDepartments: ['Asian Art'],
+      excludeTags: ['Battle', 'Military', 'Soldiers', 'Nudes', 'Mythology',
+        'Shipwrecks', 'Storms'],
+      titleKeywords: ['cottage', 'shore', 'beach', 'harbor', 'sea', 'coast',
+        'lighthouse', 'garden', 'lemon', 'porch', 'seaside'],
     },
-    rationale: ['Paintings and prints', 'From 1700 to 1920', 'Tagged with Seascapes, Ships, Waves, or Fishing'],
+    rationale: ['Paintings and prints', 'Tagged with Seascapes, Ships, Waves, or Fishing', 'Excluding storms, shipwrecks, and Asian Art'],
     source: 'curated',
   },
 
@@ -276,6 +294,7 @@ const EXAMPLE_RECIPES = {
       mediumKeywords: ['ink', 'engraving', 'etching', 'watercolor'],
       dateRange: { start: 1500, end: 1920 },
       excludeTags: ['Battle', 'Military', 'Portraits', 'Figures'],
+      titleKeywords: ['botanical', 'flower', 'plant', 'orchid', 'lily', 'rose', 'fern', 'leaf', 'vine'],
     },
     rationale: ['Botanical drawings and prints', 'From 1500 to 1920', 'Tagged with Plants, Flowers, Gardens, or Botany'],
     source: 'curated',
@@ -301,57 +320,9 @@ const EXAMPLE_RECIPES = {
       mediumKeywords: ['ink', 'engraving', 'etching'],
       dateRange: { start: 1400, end: 1900 },
       excludeTags: ['Battle', 'Military', 'Portraits'],
+      titleKeywords: ['moon', 'star', 'night sky', 'comet', 'eclipse', 'constellation', 'celestial', 'heavens'],
     },
     rationale: ['Drawings and prints', 'From 1400 to 1900', 'Tagged with Moon, Stars, Astronomy, or Zodiac'],
-    source: 'curated',
-  },
-
-  'mid-century-modern': {
-    label: 'Mid-Century Modern',
-    description: 'Clean lines and organic forms — American design objects from the postwar decades.',
-    filters: {
-      departments: ['The American Wing'],
-      tags: ['Furniture', 'Chairs', 'Tables', 'Ceramics', 'Glass', 'Textiles',
-        'Lamps', 'Desks', 'Sofas', 'Clocks', 'Vases'],
-      mediumKeywords: ['teak', 'walnut', 'fiberglass', 'aluminum', 'chrome',
-        'plywood', 'birch', 'wool', 'foam', 'plastic', 'rosewood', 'maple'],
-      dateRange: { start: 1940, end: 1975 },
-      excludeTags: ['Battle', 'Military', 'Portraits', 'Nudes', 'Mythology',
-        'Landscapes', 'Paintings'],
-    },
-    rationale: ['The American Wing', 'From 1940 to 1975', 'Furniture, ceramics, glass, and textiles', 'Made with teak, walnut, fiberglass, or aluminum'],
-    source: 'curated',
-  },
-
-  'millennial-pink': {
-    label: 'Millennial Pink',
-    description: 'Soft pink and rose tones — roses, peonies, feminine subjects, and soft interiors.',
-    filters: {
-      classifications: ['Paintings', 'Prints', 'Drawings'],
-      tags: ['Roses', 'Peonies', 'Poppies', 'Flowers', 'Women', 'Interiors', 'Still Life', 'Gardens'],
-      mediumKeywords: ['oil', 'watercolor', 'pastel'],
-      dateRange: { start: 1750, end: 1920 },
-      excludeTags: ['Battle', 'Military', 'Death', 'Nudes', 'Men', 'Boys',
-        'Soldiers', 'Mythology', 'Architecture',
-        'Night', 'Storms', 'Water', 'Seascapes', 'Winter', 'Snow', 'Rain'],
-    },
-    rationale: ['Paintings, prints, and drawings', 'From 1750 to 1920', 'Tagged with Roses, Peonies, Poppies, or Flowers', 'Excluding cool-toned and dark scenes'],
-    source: 'curated',
-  },
-
-  'moody-blues': {
-    label: 'Moody Blues',
-    description: 'Deep blues and night tones — seascapes, moonlit skies, atmospheric ink landscapes.',
-    filters: {
-      classifications: ['Paintings', 'Prints', 'Ceramics'],
-      tags: ['Water', 'Sky', 'Night', 'Seascapes', 'Waves', 'Rain', 'Storms',
-        'Moonlight', 'Moon', 'Mountains', 'Snow', 'Winter'],
-      mediumKeywords: ['oil', 'woodblock', 'engraving', 'blue', 'ink'],
-      dateRange: { start: 1600, end: 1920 },
-      excludeTags: ['Battle', 'Military', 'Portraits', 'Nudes', 'Mythology',
-        'Autumn', 'Harvest', 'Flowers', 'Gardens'],
-    },
-    rationale: ['Paintings, prints, and ceramics', 'From 1600 to 1920', 'Tagged with Water, Night, Moon, Mountains, or Seascapes', 'Including blue-and-white ceramics and Japanese woodblocks'],
     source: 'curated',
   },
 
@@ -392,27 +363,96 @@ const EXAMPLE_RECIPES = {
     filters: {
       classifications: ['Drawings', 'Prints', 'Photographs'],
       tags: ['Women', 'Flowers', 'Still Life', 'Portraits'],
-      mediumKeywords: ['watercolor', 'pencil', 'silver'],
+      mediumKeywords: ['watercolor', 'pencil', 'chalk', 'pastel'],
       dateRange: { start: 1850, end: 1970 },
       excludeTags: ['Battle', 'Military', 'Architecture', 'Death', 'Mythology', 'Nudes'],
+      titleKeywords: ['toilette', 'mirror', 'morning', 'bath', 'reader', 'letter', 'window', 'repose'],
     },
     rationale: ['Drawings, prints, and photographs', 'From 1850 to 1970', 'Tagged with Women, Flowers, Still Life, or Portraits', 'Spare, luminous compositions'],
     source: 'curated',
   },
 
-  // Color themes v1 — tag-based. Phase 2: replace with pixel-based hex color extraction.
-  'earthy-tones': {
-    label: 'Earthy Tones',
-    description: 'Terracotta, ochre, and warm browns — still lifes, harvest scenes, and ceramics.',
+  'cabincore': {
+    label: 'Cabincore',
+    description: 'Fireside wilderness — forests, hunting, mountains, and the warmth of a wood cabin.',
     filters: {
-      classifications: ['Paintings', 'Ceramics', 'Prints'],
-      tags: ['Still Life', 'Pottery', 'Autumn', 'Harvest', 'Farms', 'Fields', 'Earth', 'Flowers'],
-      mediumKeywords: ['oil', 'watercolor', 'terracotta', 'earthenware', 'stoneware', 'bronze', 'copper'],
-      dateRange: { start: 1400, end: 1920 },
-      excludeTags: ['Battle', 'Military', 'Nudes', 'Mythology', 'Death',
-        'Snow', 'Winter', 'Night', 'Water', 'Seascapes', 'Waves', 'Rain'],
+      classifications: ['Paintings', 'Prints', 'Drawings'],
+      tags: ['Forests', 'Hunting', 'Fireplaces', 'Bears', 'Deer', 'Mountains',
+        'Fishing', 'Axes', 'Rivers', 'Trees', 'Interiors'],
+      mediumKeywords: ['oil', 'watercolor', 'engraving', 'etching'],
+      dateRange: { start: 1700, end: 1920 },
+      excludeTags: ['Battle', 'Military', 'Nudes', 'Mythology', 'Portraits',
+        'Seascapes', 'Ships'],
+      titleKeywords: ['cabin', 'lodge', 'wilderness', 'forest', 'mountain',
+        'creek', 'river', 'hunt', 'camp', 'wood', 'timber', 'pine', 'birch'],
     },
-    rationale: ['Paintings, ceramics, and prints', 'Tagged with Still Life, Autumn, Harvest, or Pottery', 'Made with oil, terracotta, earthenware, bronze, or copper', 'Excluding cool-toned scenes'],
+    rationale: ['Paintings, prints, and drawings', 'From 1700 to 1920', 'Tagged with Forests, Hunting, Fireplaces, Bears, or Mountains'],
+    source: 'curated',
+  },
+
+  'goth': {
+    label: 'Goth',
+    description: 'Ruins, skulls, and shadows — the dark sublime from medieval memento mori to Victorian gloom.',
+    filters: {
+      classifications: ['Drawings', 'Prints', 'Paintings'],
+      tags: ['Skulls', 'Death', 'Ruins', 'Skeletons', 'Bats', 'Demons',
+        'Coffins', 'Tombs', 'Night', 'Cemeteries'],
+      mediumKeywords: ['ink', 'engraving', 'etching'],
+      dateRange: { start: 1400, end: 1900 },
+      excludeTags: ['Battle', 'Military', 'Soldiers', 'Children', 'Portraits',
+        'Flowers', 'Gardens', 'Animals'],
+      titleKeywords: ['death', 'grave', 'tomb', 'ruin', 'shadow', 'dark',
+        'skull', 'night', 'macabre', 'melancholy', 'lament', 'mourning'],
+    },
+    rationale: ['Drawings, prints, and paintings', 'From 1400 to 1900', 'Tagged with Skulls, Death, Ruins, Skeletons, or Demons'],
+    source: 'curated',
+  },
+
+  'dogs': {
+    label: 'Dogs',
+    description: 'Dogs throughout art history — loyal companions, hunting hounds, and pampered pets.',
+    filters: {
+      tags: ['Dogs'],
+    },
+    rationale: ['Tagged with Dogs', 'Across all departments and eras'],
+    source: 'curated',
+  },
+
+  'dinner-party': {
+    label: 'Dinner Party',
+    description: 'Abundant tables and gilded feasts — Dutch still lifes, banquet scenes, and the art of the meal.',
+    filters: {
+      classifications: ['Paintings', 'Prints'],
+      tags: ['Still Life', 'Food', 'Fruit', 'Dining', 'Banquets', 'Wine',
+        'Candlesticks', 'Tables', 'Bowls', 'Cups', 'Pitchers', 'Bread',
+        'Vegetables', 'Fish'],
+      mediumKeywords: ['oil', 'watercolor'],
+      dateRange: { start: 1600, end: 1920 },
+      excludeTags: ['Battle', 'Military', 'Portraits', 'Landscapes', 'Fishing',
+        'Nudes', 'Mythology', 'Fish Market', 'Markets'],
+      titleKeywords: ['feast', 'banquet', 'dinner', 'supper', 'meal', 'table',
+        'fruit', 'wine', 'still life', 'spread', 'abundance', 'larder'],
+    },
+    rationale: ['Paintings and prints', 'From 1600 to 1920', 'Tagged with Still Life, Food, Fruit, Dining, or Banquets'],
+    source: 'curated',
+  },
+
+  'night-out': {
+    label: 'Night Out',
+    description: 'Belle époque revelry — cabaret posters, dancers, jazz musicians, and the electric city after dark.',
+    filters: {
+      classifications: ['Paintings', 'Prints', 'Drawings'],
+      tags: ['Dancing', 'Dancers', 'Dance', 'Musicians', 'Music', 'Drinking',
+        'Opera', 'Taverns', 'Circus', 'Restaurants'],
+      mediumKeywords: ['oil', 'lithograph', 'pastel'],
+      dateRange: { start: 1850, end: 1940 },
+      excludeTags: ['Battle', 'Military', 'Landscapes', 'Still Life',
+        'Mythology', 'Nudes', 'Death'],
+      titleKeywords: ['party', 'dance', 'night', 'cabaret', 'ball', 'fête',
+        'champagne', 'bar', 'café', 'music hall', 'revue', 'soirée',
+        'masquerade', 'concert', 'carnival'],
+    },
+    rationale: ['Paintings, prints, and drawings', 'From 1850 to 1940', 'Tagged with Dancing, Dancers, Musicians, or Drinking'],
     source: 'curated',
   },
 
@@ -434,10 +474,78 @@ const EXAMPLE_RECIPES = {
 
 };
 
+// Inactive themes — either data-sparse (mid-century modern) or color themes
+// needing pixel-level extraction (Phase 2). Preserved for later activation.
+const INACTIVE_RECIPES = {
+  'mid-century-modern': {
+    label: 'Mid-Century Modern',
+    description: 'Clean lines and organic forms — American and modern design objects from the postwar decades.',
+    filters: {
+      departments: ['The American Wing', 'Modern and Contemporary Art'],
+      tags: ['Furniture', 'Chairs', 'Tables', 'Ceramics', 'Glass', 'Textiles',
+        'Lamps', 'Desks', 'Sofas', 'Clocks', 'Vases'],
+      mediumKeywords: ['teak', 'walnut', 'fiberglass', 'aluminum', 'chrome',
+        'plywood', 'birch', 'wool', 'foam', 'plastic', 'rosewood', 'maple'],
+      dateRange: { start: 1940, end: 1975 },
+      excludeTags: ['Battle', 'Military', 'Portraits', 'Nudes', 'Mythology', 'Landscapes'],
+    },
+    rationale: ['The American Wing and Modern & Contemporary Art', 'From 1940 to 1975', 'Furniture, ceramics, glass, and textiles', 'Made with teak, walnut, fiberglass, or aluminum'],
+    source: 'curated',
+  },
+
+  'earthy-tones': {
+    label: 'Earthy Tones',
+    description: 'Terracotta, ochre, and warm browns — still lifes, harvest scenes, and ceramics.',
+    filters: {
+      classifications: ['Paintings', 'Ceramics', 'Prints'],
+      tags: ['Still Life', 'Pottery', 'Autumn', 'Harvest', 'Farms', 'Fields', 'Earth', 'Flowers'],
+      mediumKeywords: ['oil', 'watercolor', 'terracotta', 'earthenware', 'stoneware', 'bronze', 'copper'],
+      dateRange: { start: 1400, end: 1920 },
+      excludeTags: ['Battle', 'Military', 'Nudes', 'Mythology', 'Death',
+        'Snow', 'Winter', 'Night', 'Water', 'Seascapes', 'Waves', 'Rain'],
+    },
+    rationale: ['Paintings, ceramics, and prints', 'Tagged with Still Life, Autumn, Harvest, or Pottery', 'Made with oil, terracotta, earthenware, bronze, or copper', 'Excluding cool-toned scenes'],
+    source: 'curated',
+  },
+
+  'millennial-pink': {
+    label: 'Millennial Pink',
+    description: 'Soft pink and rose tones — roses, peonies, feminine subjects, and soft interiors.',
+    filters: {
+      classifications: ['Paintings', 'Prints', 'Drawings'],
+      tags: ['Roses', 'Peonies', 'Poppies', 'Flowers', 'Women', 'Interiors', 'Still Life', 'Gardens'],
+      mediumKeywords: ['oil', 'watercolor', 'pastel'],
+      dateRange: { start: 1750, end: 1920 },
+      excludeTags: ['Battle', 'Military', 'Death', 'Nudes', 'Men', 'Boys',
+        'Soldiers', 'Mythology', 'Architecture',
+        'Night', 'Storms', 'Water', 'Seascapes', 'Winter', 'Snow', 'Rain'],
+    },
+    rationale: ['Paintings, prints, and drawings', 'From 1750 to 1920', 'Tagged with Roses, Peonies, Poppies, or Flowers', 'Excluding cool-toned and dark scenes'],
+    source: 'curated',
+  },
+
+  'moody-blues': {
+    label: 'Moody Blues',
+    description: 'Deep blues and night tones — seascapes, moonlit skies, atmospheric ink landscapes.',
+    filters: {
+      classifications: ['Paintings', 'Prints', 'Ceramics'],
+      tags: ['Water', 'Sky', 'Night', 'Seascapes', 'Waves', 'Rain', 'Storms',
+        'Moonlight', 'Moon', 'Mountains', 'Snow', 'Winter'],
+      mediumKeywords: ['oil', 'woodblock', 'engraving', 'blue', 'ink'],
+      dateRange: { start: 1600, end: 1920 },
+      excludeTags: ['Battle', 'Military', 'Portraits', 'Nudes', 'Mythology',
+        'Autumn', 'Harvest', 'Flowers', 'Gardens'],
+    },
+    rationale: ['Paintings, prints, and ceramics', 'From 1600 to 1920', 'Tagged with Water, Night, Moon, Mountains, or Seascapes', 'Including blue-and-white ceramics and Japanese woodblocks'],
+    source: 'curated',
+  },
+};
+
 module.exports = {
   validateRecipe,
   describeFilters,
   EXAMPLE_RECIPES,
+  INACTIVE_RECIPES,
   GLOBAL_EXCLUDE_TAGS,
   KNOWN_CLASSIFICATIONS,
   KNOWN_DEPARTMENTS,
