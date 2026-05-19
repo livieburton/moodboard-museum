@@ -86,12 +86,22 @@ Set `ANTHROPIC_API_KEY` in your environment for free-text search.
 - Test on `localhost:5173` before pushing
 - Batch related changes into one commit
 
+## Color extraction
+
+Color search and color-aware result re-ranking require a one-time extraction pass over all artwork images. This is slow (it downloads and processes every image) but only needs to be run once, or re-run after large enrichment batches.
+
+1. **Add the colors table** — `npm run migrate-colors` (safe to run multiple times)
+2. **Extract colors** — `npm run extract-colors` (runs until all images are processed — can be interrupted and resumed)
+3. **Deploy the updated database** — follow the steps in "Deploying database updates" below once extraction is complete
+
+Until extraction is run, color search and the search-by-color tab still work via hex color proximity — they just won't re-rank keyword results.
+
 ## Deploying database updates
 
-1. **Stop enrichment** — if `npm run enrich` is running, kill it so the DB isn't mid-write
+1. **Stop enrichment** — if `npm run enrich` or `npm run extract-colors` is running, kill it so the DB isn't mid-write
 2. **Regenerate the snapshot** — `node scripts/compress-db.js` (overwrites `data/moodboard.sqlite.snapshot.gz`)
 3. **Commit and push** — `git add data/moodboard.sqlite.snapshot.gz && git commit -m "Update DB snapshot" && git push`
-4. **Restart enrichment** — resume `npm run enrich` locally; the deployed server decompresses the new snapshot on next start
+4. **Restart enrichment** — resume `npm run enrich` or `npm run extract-colors` locally; the deployed server decompresses the new snapshot on next start
 
 ## Data sources
 
