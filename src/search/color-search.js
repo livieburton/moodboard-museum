@@ -187,7 +187,7 @@ function getColorScore(objectId, labColor) {
  * @param {string}        colorHex  - Target hex color, e.g. '#0047AB'.
  * @returns {Array<object>}          - Re-ordered results array.
  */
-function reRankByColor(results, colorHex) {
+function reRankByColor(results, colorHex, colorWeight = 0.3) {
   if (!results.length || !colorHex) return results;
 
   const labColor = hexToLab(colorHex);
@@ -210,7 +210,7 @@ function reRankByColor(results, colorHex) {
     const colorNorm = rawColorScore === null
       ? 0.5
       : 1 - (rawColorScore - minScore) / range;
-    return { r, score: 0.7 * thematicScore + 0.3 * colorNorm };
+    return { r, score: (1 - colorWeight) * thematicScore + colorWeight * colorNorm };
   });
 
   scored.sort((a, b) => b.score - a.score);

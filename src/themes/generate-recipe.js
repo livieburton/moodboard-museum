@@ -111,7 +111,7 @@ Rules:
 - isHighlight: true only if the query clearly favors blockbuster/famous works
 - rationale: 2-4 short phrases a person would read to understand why these results match
 - Use 2-6 tags. Omit any filter that doesn't clearly serve the aesthetic.
-- colorHex (optional): a 6-digit hex color for the single most dominant color the aesthetic evokes. Include ONLY when there is one clearly dominant color — e.g. "brat summer" → "#8ACE00" (lime green), "cobalt ceramics" → "#0047AB", "prairiecore" → "#C8A87D" (wheat/golden grass), "red velvet" → "#8B1A1A", "ocean" → "#006994". Omit for aesthetics that span many colors or are color-neutral (most aesthetics — dark academia, steampunk, etc. — should omit this).
+- colorHex (optional): a 6-digit hex color for the dominant color the aesthetic most strongly evokes. Include this whenever the aesthetic has a meaningful color association — err on the side of including. Examples: "brat summer" → "#8ACE00", "barbie" → "#FF69B4", "barbiecore" → "#FF69B4", "ocean" → "#006994", "prairiecore" → "#C8A87D", "red velvet" → "#8B1A1A", "forest" → "#228B22", "golden hour" → "#FDB347", "midnight" → "#191970", "cobalt ceramics" → "#0047AB". Omit ONLY when the aesthetic genuinely spans many colors with no single dominant hue (e.g. "dark academia", "steampunk", "art nouveau", "cottagecore").
 - Output ONLY the raw JSON object. No markdown, no explanation, no code fences.`;
 
 async function generateRecipe(userQuery) {

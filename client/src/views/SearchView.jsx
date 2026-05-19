@@ -93,7 +93,6 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
       const data = await searchFreeText(q);
       setResults(data.results);
       setMatchReason(data.matchReason);
-      setResultColorHex(data.colorHex || null);
     } catch (err) {
       setError(err.message);
     } finally {

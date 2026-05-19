@@ -43,30 +43,26 @@ router.post('/', async (req, res) => {
   }
 
   try {
-    // ── Color-name shortcut ──────────────────────────────────────────────
-    // If the query is a recognisable color name (e.g. "millennial pink",
-    // "sage green", "terracotta"), skip the LLM and run a color search.
-    const colorMatch = getColorHex(query);
-    if (colorMatch) {
-      const labColor = hexToLab(colorMatch.hex);
-      const colorResults = searchByColor(labColor, 48);
-      // Capitalise the matched color name for display
-      const displayName = colorMatch.name.replace(/\b\w/g, (c) => c.toUpperCase());
-      return res.json({
-        matchReason: colorResults.length > 0
-          ? `${colorResults.length} artwork${colorResults.length === 1 ? '' : 's'} closest to ${displayName} (${colorMatch.hex.toUpperCase()})`
-          : `No color data yet for ${displayName} — run extract-colors to populate the index`,
-        count: colorResults.length,
-        results: colorResults,
-        colorHex: colorMatch.hex,  // lets the frontend optionally show a swatch
-        warnings: [],
-      });
-    }
-
-    // ── Color-mode inference ─────────────────────────────────────────────
-    // In color mode the user is describing a color or color-associated phrase
-    // (e.g. "red velvet cake", "brat summer"). Ask Claude to infer the hex.
+    // ── Color tab paths ──────────────────────────────────────────────────
     if (colorMode) {
+      // Fast path: recognisable color name (e.g. "millennial pink", "barbiecore")
+      const colorMatch = getColorHex(query);
+      if (colorMatch) {
+        const labColor = hexToLab(colorMatch.hex);
+        const colorResults = searchByColor(labColor, 48);
+        const displayName = colorMatch.name.replace(/\b\w/g, (c) => c.toUpperCase());
+        return res.json({
+          matchReason: colorResults.length > 0
+            ? `${colorResults.length} artwork${colorResults.length === 1 ? '' : 's'} closest to ${displayName} (${colorMatch.hex.toUpperCase()})`
+            : `No color data yet for ${displayName} — run extract-colors to populate the index`,
+          count: colorResults.length,
+          results: colorResults,
+          colorHex: colorMatch.hex,
+          warnings: [],
+        });
+      }
+
+      // Slow path: ask Claude to infer the hex from the phrase
       const inferredHex = await inferColorFromPhrase(query);
       if (inferredHex) {
         const labColor = hexToLab(inferredHex);
@@ -136,7 +132,15 @@ router.post('/', async (req, res) => {
     }
 
     if (recipe.colorHex) {
-      results = reRankByColor(results, recipe.colorHex);
+      // Inject color-matched artworks to fill up to 48 results, then re-rank so
+      // on-theme + on-color results rise to the top and pure-color fills the gaps.
+      const labColor = hexToLab(recipe.colorHex);
+      const colorPool = searchByColor(labColor, 48);
+      const thematicIds = new Set(results.map((r) => r.object_id));
+      const injections = colorPool
+        .filter((r) => !thematicIds.has(r.object_id))
+        .slice(0, Math.max(0, 48 - results.length));
+      results = reRankByColor([...results, ...injections], recipe.colorHex, 0.4);
     }
 
     res.json({
