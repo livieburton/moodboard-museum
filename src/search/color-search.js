@@ -28,6 +28,13 @@ function loadColors(db) {
   colorIndex = new Map();
   metaIndex  = new Map();
 
+  // Check the table exists before querying — production DB may not have it yet.
+  const tableCheck = db.exec("SELECT name FROM sqlite_master WHERE type='table' AND name='colors'");
+  if (!tableCheck.length || !tableCheck[0].values.length) {
+    console.log('[color-search] colors table not found — color features disabled until migration runs.');
+    return;
+  }
+
   // Load all color rows
   const colorStmt = db.prepare(
     'SELECT object_id, l, a, b, weight FROM colors ORDER BY object_id'
