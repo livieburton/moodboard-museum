@@ -15,6 +15,8 @@
     "verify-db": "node src/pipeline/verify-db.js",
     "enrich": "node src/pipeline/enrich-images.js",
     "test-enrich": "node src/pipeline/test-enrich.js",
+    "migrate-colors": "node src/pipeline/migrate-add-colors.js",
+    "extract-colors": "node src/pipeline/extract-colors.js",
     "foundation": "npm run fixture && npm run build-db && npm run verify-db",
     "dev:server": "node server/index.js",
     "dev:client": "vite",
@@ -42,6 +44,7 @@
     "express": "^4.18.2",
     "express-rate-limit": "^8.5.2",
     "natural": "^8.1.1",
+    "sharp": "^0.34.5",
     "sql.js": "^1.14.1"
   },
   "devDependencies": {

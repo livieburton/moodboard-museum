@@ -325,10 +325,116 @@ body {
   padding: 2.5rem 2.5rem 4rem;
 }
 
+/* ── Search top bar (toggle + about link) ── */
+
+.search-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.search-about-link {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: color 0.12s;
+}
+
+.search-about-link:hover {
+  color: var(--text);
+}
+
+/* ── Search mode toggle ── */
+
+.search-mode-toggle {
+  display: flex;
+  gap: 0.5rem;
+  width: fit-content;
+}
+
+.search-mode-btn {
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent);
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+
+.search-mode-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.search-mode-btn:not(.active):hover {
+  background: rgba(44, 74, 62, 0.06);
+}
+
+/* ── Color search section ── */
+
+.color-search-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.color-search-section .search-form {
+  margin-bottom: 0;
+}
+
+/* ── Color picker row ── */
+
+.color-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.5rem 0;
+}
+
+.color-picker-input {
+  width: 72px;
+  height: 64px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 2px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.color-picker-input:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.color-picker-hex {
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
+}
+
+.color-picker-loading {
+  font-family: var(--sans);
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
 /* ── Search form ── */
 
 .search-form {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
@@ -359,29 +465,35 @@ body {
 }
 
 .search-button {
-  background: none;
-  border: none;
-  padding: 0;
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   flex-shrink: 0;
+  white-space: nowrap;
   transition: opacity 0.12s;
 }
 
 .search-button:disabled {
   cursor: default;
+  opacity: 0.6;
 }
 
-.search-button__img {
-  height: 44px;
-  width: auto;
-  display: block;
+.search-button:not(:disabled):hover {
+  opacity: 0.88;
 }
 
+/* kept for graceful transition — no longer rendered */
 .search-button__loading {
   display: flex;
   align-items: center;
-  height: 44px;
   padding: 0 1rem;
   font-family: var(--sans);
   font-size: 0.875rem;
@@ -423,9 +535,44 @@ body {
   color: #fff;
 }
 
+/* ── Curated color pills ── */
+
+.color-pill-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.color-pill {
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: filter 0.12s, box-shadow 0.12s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+.color-pill:hover {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+.color-pill.active {
+  border-color: rgba(255, 255, 255, 0.55);
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(0, 0, 0, 0.35);
+}
+
 /* ── Match reason bar ── */
 
 .match-reason-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   font-size: 0.8rem;
   color: #7a6a60;
   margin-bottom: 1.75rem;
@@ -433,11 +580,26 @@ body {
   border-bottom: 1px solid var(--border);
 }
 
+.match-reason-swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.12);
+  flex-shrink: 0;
+}
+
 /* ── Masonry grid ── */
+
+@keyframes results-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 .results-grid {
   columns: 4 260px;
   column-gap: 1.25rem;
+  animation: results-fade-in 0.5s ease 0.2s both;
 }
 
 /* ── Artwork card ── */
@@ -448,6 +610,15 @@ body {
   border-radius: 2px;
   overflow: hidden;
   break-inside: avoid;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.artwork-card--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
   margin-bottom: 1.25rem;
   transition: box-shadow 0.2s, border-color 0.2s;
 }
@@ -949,27 +1120,46 @@ body {
   gap: 10px;
 }
 
-.fab-img-btn {
+.fab-moodboard-btn {
   position: relative;
-  background: none;
-  border: none;
-  padding: 0;
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   user-select: none;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.28));
   transition: opacity 0.12s, transform 0.12s;
 }
 
-.fab-img-btn:hover {
+.fab-moodboard-btn:hover {
   opacity: 0.88;
   transform: translateY(-1px);
 }
 
-.fab-img-btn__img {
-  width: 180px;
-  height: auto;
-  display: block;
+.fab-about-btn {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: opacity 0.12s, transform 0.12s;
+}
+
+.fab-about-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
 }
 
 /* ── Responsive ── */
@@ -1027,17 +1217,9 @@ body {
     margin-bottom: 0.875rem;
   }
 
-  .search-button__img {
-    height: 38px;
-  }
-
   .fab-stack {
     bottom: max(24px, calc(env(safe-area-inset-bottom) + 16px));
     right: 20px;
-  }
-
-  .fab-img-btn__img {
-    width: 140px;
   }
 
   /* Theme pills: single-row horizontal scroll with right-edge fade */

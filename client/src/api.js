@@ -12,13 +12,21 @@ export async function queryTheme(slug) {
   return res.json();
 }
 
-export async function searchFreeText(query) {
+export async function searchFreeText(query, { colorMode = false } = {}) {
   const res = await fetch(`${BASE}/search`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({ query, colorMode }),
   });
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || `Search failed (${res.status})`);
+  return data;
+}
+
+export async function searchByColor(hex) {
+  const clean = hex.replace(/^#/, '');
+  const res = await fetch(`${BASE}/search/color?hex=${encodeURIComponent(clean)}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || `Color search failed (${res.status})`);
   return data;
 }

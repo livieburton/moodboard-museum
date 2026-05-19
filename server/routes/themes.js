@@ -1,6 +1,7 @@
 const express = require('express');
 const { queryTheme } = require('../../src/themes/query');
 const { EXAMPLE_RECIPES } = require('../../src/themes/theme-recipe');
+const { reRankByColor } = require('../../src/search/color-search');
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ router.get('/:slug', async (req, res) => {
 
     // Hard public-domain gate at the API boundary. The DB ingest and query
     // engine already enforce this — this is the third and final check.
-    const results = result.results
+    let results = result.results
       .filter((r) => r.is_public_domain === 1)
       .map((r) => ({
         object_id: r.object_id,
@@ -40,6 +41,10 @@ router.get('/:slug', async (req, res) => {
         tags: r.tags,
         matchReason: r.matchReason,
       }));
+
+    if (recipe.colorHex) {
+      results = reRankByColor(results, recipe.colorHex);
+    }
 
     res.json({
       theme: result.theme,

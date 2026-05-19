@@ -24,7 +24,9 @@ const KNOWN_DEPARTMENTS = [
   'Egyptian Art', 'Greek and Roman Art', 'Drawings and Prints',
   'Modern and Contemporary Art', 'Medieval Art', 'Islamic Art',
   'Costume Institute', 'Photographs', 'The Cloisters',
-  'Arms and Armor', 'Musical Instruments',
+  // Note: Arms and Armor (7,081 objects) and Musical Instruments (2,282 objects)
+  // are intentionally excluded — neither department has been image-enriched,
+  // so using them returns zero results.
   'European Sculpture and Decorative Arts',
   'Arts of Africa, Oceania, and the Americas',
   'Ancient Near Eastern Art',
@@ -126,6 +128,11 @@ function validateRecipe(input) {
   }
   const validSources = ['curated', 'llm', 'embedding'];
   const source = validSources.includes(input.source) ? input.source : 'unknown';
+  let colorHex;
+  if (typeof input.colorHex === 'string' && /^#[0-9A-Fa-f]{6}$/i.test(input.colorHex.trim())) {
+    colorHex = input.colorHex.trim().toUpperCase();
+  }
+
   const hardErrors = errors.filter((e) => !e.startsWith('Note:'));
   if (hardErrors.length > 0) { return { valid: false, errors }; }
   return {
@@ -136,6 +143,7 @@ function validateRecipe(input) {
       filters,
       rationale,
       source,
+      ...(colorHex ? { colorHex } : {}),
     },
     warnings: errors.filter((e) => e.startsWith('Note:')),
   };
@@ -173,6 +181,7 @@ const EXAMPLE_RECIPES = {
   'dark-academia': {
     label: 'Dark Academia',
     description: 'Moody scholarship — old portraits, books, shadowed interiors.',
+    colorHex: '#6B4423',
     filters: {
       classifications: ['Paintings', 'Drawings'],
       tags: ['Portraits', 'Books', 'Reading', 'Writing'],
@@ -192,6 +201,7 @@ const EXAMPLE_RECIPES = {
   'cottagecore': {
     label: 'Cottagecore',
     description: 'Pastoral calm — landscapes, flowers, rural life.',
+    colorHex: '#87AE73',
     filters: {
       classifications: ['Paintings', 'Prints'],
       tags: ['Landscapes', 'Flowers', 'Gardens', 'Animals', 'Farms', 'Sheep', 'Birds'],
@@ -208,6 +218,7 @@ const EXAMPLE_RECIPES = {
   'goblincore': {
     label: 'Goblincore',
     description: 'Mossy, fungal, feral — the beauty of overlooked natural things.',
+    colorHex: '#4A5E3A',
     filters: {
       classifications: ['Drawings', 'Prints'],
       tags: ['Insects', 'Plants', 'Animals', 'Flowers', 'Birds', 'Snails',
@@ -239,6 +250,7 @@ const EXAMPLE_RECIPES = {
   'witchy': {
     label: 'Witchy',
     description: 'Candles, herbs, moons, and the occult — magic as aesthetic.',
+    colorHex: '#4A0E4E',
     filters: {
       classifications: ['Drawings', 'Prints'],
       tags: ['Witches', 'Skulls', 'Demons', 'Devil', 'Magic', 'Serpents',
@@ -255,6 +267,7 @@ const EXAMPLE_RECIPES = {
   'coastal-grandmother': {
     label: 'Coastal Grandmother',
     description: 'Linen, shells, soft blues — the quiet poetry of life by the sea.',
+    colorHex: '#7698B3',
     filters: {
       classifications: ['Paintings', 'Prints'],
       tags: ['Seascapes', 'Ships', 'Waves', 'Fishing', 'Beaches', 'Boats', 'Sailors'],
@@ -272,6 +285,7 @@ const EXAMPLE_RECIPES = {
   'hygge': {
     label: 'Hygge',
     description: 'Warmth, candlelight, and quiet interiors — the art of cozy.',
+    colorHex: '#C68642',
     filters: {
       classifications: ['Paintings'],
       tags: ['Interiors', 'Fireplaces', 'Candles', 'Tea', 'Tea Drinking',
@@ -288,6 +302,7 @@ const EXAMPLE_RECIPES = {
   'plant-mom': {
     label: 'Plant Mom',
     description: 'Lush botanical life — scientific illustration, specimen drawings, garden abundance.',
+    colorHex: '#4A7C3F',
     filters: {
       classifications: ['Drawings', 'Prints'],
       tags: ['Plants', 'Flowers', 'Gardens', 'Trees', 'Botany', 'Leaves'],
@@ -313,6 +328,7 @@ const EXAMPLE_RECIPES = {
   'celestial': {
     label: 'Celestial',
     description: 'Stars, moons, and the cosmos — astronomical illustration and mythological skies.',
+    colorHex: '#1A237E',
     filters: {
       classifications: ['Drawings', 'Prints'],
       tags: ['Moon', 'Stars', 'Astronomy', 'Astrology', 'Zodiac', 'Sky',
@@ -329,6 +345,7 @@ const EXAMPLE_RECIPES = {
   'mermaidcore': {
     label: 'Mermaidcore',
     description: 'Ocean depths and mythological seas — waves, sea creatures, and aquatic gods.',
+    colorHex: '#006994',
     filters: {
       tags: ['Mermaids', 'Mermen', 'Waves', 'Fish', 'Seahorses', 'Dolphins',
         'Octopus', 'Seascapes', 'Neptune', 'Poseidon', 'Triton'],
@@ -393,6 +410,7 @@ const EXAMPLE_RECIPES = {
   'goth': {
     label: 'Goth',
     description: 'Ruins, skulls, and shadows — the dark sublime from medieval memento mori to Victorian gloom.',
+    colorHex: '#2D2D2D',
     filters: {
       classifications: ['Drawings', 'Prints', 'Paintings'],
       tags: ['Skulls', 'Death', 'Ruins', 'Skeletons', 'Bats', 'Demons',
@@ -440,6 +458,7 @@ const EXAMPLE_RECIPES = {
   'night-out': {
     label: 'Night Out',
     description: 'Belle époque revelry — cabaret posters, dancers, jazz musicians, and the electric city after dark.',
+    colorHex: '#C5973A',
     filters: {
       classifications: ['Paintings', 'Prints', 'Drawings'],
       tags: ['Dancing', 'Dancers', 'Dance', 'Musicians', 'Music', 'Drinking',

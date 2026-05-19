@@ -34,6 +34,13 @@ export default function AboutPage() {
       </section>
 
       <section className="about-section">
+        <h2 className="about-section__heading">Who it's for</h2>
+        <p className="about-section__body">
+          Designers, students, curators, artists, writers, museumgoers, gallery hoppers, creatives, creators, builders, historians, explorers, and curious people.
+        </p>
+      </section>
+
+      <section className="about-section">
         <h2 className="about-section__heading">How it works</h2>
         <p className="about-section__body">
           When you search an aesthetic, Moodboard Museum uses AI to translate your search into a set of filters — medium, period, subject tags — and queries a database of <strong>{count}</strong> objects from open access collections. Results are ranked by relevance to the aesthetic. You can add images to a moodboard, rearrange them, and download the result as a PNG with full attribution. If you want to learn more about an image, you can click through to the museum's website. Because results are based on database tags, searches are imperfect — but that's part of what makes them interesting.

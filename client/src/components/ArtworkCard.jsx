@@ -1,15 +1,33 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function ArtworkCard({ artwork, onAdd, isAdded }) {
   const { object_id, title, artist_name, museum, primary_image_small, primary_image, link_resource } = artwork;
   const imgSrc = primary_image_small || primary_image;
   const metUrl = link_resource || `https://www.metmuseum.org/art/collection/search/${object_id}`;
   const [hidden, setHidden] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.08 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   if (hidden) return null;
 
   return (
-    <div className="artwork-card">
+    <div ref={cardRef} className={`artwork-card${visible ? ' artwork-card--visible' : ''}`}>
       <a
         className="artwork-card__link"
         href={metUrl}

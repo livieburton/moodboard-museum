@@ -3,12 +3,15 @@ const path = require('path');
 const fs = require('fs');
 const zlib = require('zlib');
 const { pipeline } = require('stream/promises');
+const { openDb } = require('../src/pipeline/db');
+const { loadColors } = require('../src/search/color-search');
 
 const app = express();
 app.set('trust proxy', 1);
 app.use(express.json());
 
 app.use('/api/themes', require('./routes/themes'));
+app.use('/api/search/color', require('./routes/color-search')); // must be before /api/search
 app.use('/api/search', require('./routes/search'));
 app.use('/api/random', require('./routes/random'));
 app.use('/api/image-proxy', require('./routes/image-proxy'));
@@ -50,7 +53,10 @@ async function ensureDatabase() {
 }
 
 ensureDatabase()
-  .then(() => {
+  .then(() => openDb())
+  .then(({ db }) => {
+    // Build in-memory color index (non-blocking — empty index if no rows yet)
+    loadColors(db);
     app.listen(PORT, () => {
       console.log(`Moodboard Museum server on http://localhost:${PORT}`);
       console.log(process.env.ANTHROPIC_API_KEY ? 'API key loaded' : 'API KEY MISSING');

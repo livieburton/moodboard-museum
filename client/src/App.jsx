@@ -87,15 +87,18 @@ function AppShell() {
       {isExplore && !panelOpen && (
         <div className="fab-stack">
           <button
-            className="fab-img-btn"
+            className="fab-moodboard-btn"
             aria-label={`Open moodboard, ${moodboard.length} items`}
             onClick={() => setPanelOpen(true)}
           >
-            <img src="/btn-moodboard.svg" alt="My Moodboard" className="fab-img-btn__img" />
+            My Moodboard
             {moodboard.length > 0 && (
               <span className="moodboard-btn__badge">{moodboard.length}</span>
             )}
           </button>
+          <Link to="/about" className="fab-about-btn">
+            About
+          </Link>
         </div>
       )}
 
