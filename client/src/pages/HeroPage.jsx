@@ -80,14 +80,17 @@ export default function HeroPage() {
       <div className="hero-content">
         <div className="hero-card">
           <img src="/logo1.svg" alt="Moodboard Museum" className="hero__logo" />
-          <p className="hero__intro">
-            Every aesthetic has a visual history, and much of it is hanging in museums. Moodboard Museum helps you find it.
+          <p style={{ whiteSpace: 'pre-line', fontSize: 22, lineHeight: 1.55,
+                     fontFamily: 'var(--serif-body)', fontWeight: 500, color: 'var(--text)' }}>
+            Every aesthetic has a visual history,{'\n'}and much of it is stored in museums.{'\n'}
+            <em>Moodboard Museum</em> helps you find it.
           </p>
-          <p className="hero__intro">
+          <p style={{ marginTop: 14, fontSize: 19, fontStyle: 'italic',
+                     fontFamily: 'var(--serif-body)', color: 'var(--text-secondary)' }}>
             Every image here was made by a human.
           </p>
-          <button className="hero__cta hero__cta--img" onClick={() => navigate('/explore')} aria-label="Enter">
-            <img src="/btn-enter.svg" alt="Enter" className="hero__cta-img" />
+          <button className="hero__cta-text" onClick={() => navigate('/explore')}>
+            Enter the archive <span aria-hidden>→</span>
           </button>
         </div>
       </div>

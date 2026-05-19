@@ -37,7 +37,7 @@ function loadColors(db) {
 
   // Load all color rows
   const colorStmt = db.prepare(
-    'SELECT object_id, l, a, b, weight FROM colors ORDER BY object_id'
+    'SELECT object_id, l, a, b, weight FROM colors WHERE weight > 0 ORDER BY object_id'
   );
   colorStmt.bind([]);
   while (colorStmt.step()) {

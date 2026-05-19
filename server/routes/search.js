@@ -82,7 +82,7 @@ router.post('/', async (req, res) => {
 
     // ── Normal keyword search ────────────────────────────────────────────
     const { recipe, warnings } = await generateRecipe(query);
-    let data = await queryTheme(recipe, { limit: 50 });
+    let data = await queryTheme(recipe, { limit: 200 });
     let results = data.results
       .filter((r) => r.is_public_domain === 1)
       .map(({ is_public_domain: _, ...r }) => ({ ...r, museum: 'The Met' }));
@@ -102,7 +102,7 @@ router.post('/', async (req, res) => {
           ...recipe,
           filters: { ...recipe.filters, cultures: undefined, dateRange: undefined },
         };
-        const fallbackData = await queryTheme(relaxed, { limit: 50 });
+        const fallbackData = await queryTheme(relaxed, { limit: 200 });
         const fallbackResults = fallbackData.results
           .filter((r) => r.is_public_domain === 1)
           .map(({ is_public_domain: _, ...r }) => ({ ...r, museum: 'The Met' }));
@@ -118,7 +118,7 @@ router.post('/', async (req, res) => {
             ...recipe,
             filters: { ...recipe.filters, cultures: undefined, dateRange: undefined, departments: undefined },
           };
-          const fallbackData2 = await queryTheme(relaxed2, { limit: 50 });
+          const fallbackData2 = await queryTheme(relaxed2, { limit: 200 });
           const fallbackResults2 = fallbackData2.results
             .filter((r) => r.is_public_domain === 1)
             .map(({ is_public_domain: _, ...r }) => ({ ...r, museum: 'The Met' }));

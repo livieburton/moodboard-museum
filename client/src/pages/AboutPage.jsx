@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 
 export default function AboutPage() {
   const [total, setTotal] = useState(null);
@@ -12,63 +11,66 @@ export default function AboutPage() {
   }, []);
 
   const count = total !== null ? total.toLocaleString() : '…';
+  const link = 'color:var(--accent);border-bottom:1px solid var(--accent);text-decoration:none';
+
+  const sections = [
+    {
+      mark: 'I',
+      title: 'What it is',
+      body: 'Moodboard Museum is a search tool for CC0 art from the world\'s great museums, organized by aesthetic rather than period or medium. Search a mood — dark academia, cottagecore, girlboss — and find real, human-made artwork that fits the vibe.',
+    },
+    {
+      mark: 'II',
+      title: 'Why we built it',
+      body: 'Why create more "AI slop" when there are thousands of real, human-made artworks at your fingertips? The world\'s museums have spent centuries collecting and preserving art and cultural artifacts, and much of it is freely available under CC0 licenses. Moodboard Museum makes that collection discoverable by aesthetic, so your next moodboard, mood reference, or creative project is more human.',
+    },
+    {
+      mark: 'III',
+      title: 'Who it\'s for',
+      body: 'Designers, students, curators, artists, writers, museumgoers, gallery hoppers, creatives, creators, builders, historians, explorers, and curious humans.',
+    },
+    {
+      mark: 'IV',
+      title: 'How it works',
+      body: `When you search an aesthetic, Moodboard Museum uses an LLM to translate your search into a set of structured filters — medium, period, subject tags — and queries a database of ${count} objects from open access collections. Results are ranked by relevance to the aesthetic. You can add images to a moodboard, rearrange them, and download the result as a PNG with full attribution. Because results are based on database tags, searches are imperfect (but that's part of what makes them interesting).<br><br>All images are Creative Commons Zero (CC0). Moodboard Museum includes attribution anyway because artists deserve credit, and because knowing who made something is part of understanding&nbsp;it.`,
+    },
+    {
+      mark: 'V',
+      title: 'Pardon our dust',
+      body: 'I\'m working on expanding the archive with more collections and capabilities — stay tuned!',
+    },
+    {
+      mark: 'VI',
+      title: 'Get in touch',
+      body: `If you'd like to suggest an addition or contribute to the project, say hello on <a href="https://github.com/livieburton/moodboard-museum" style="${link}">GitHub</a> or find me on <a href="https://www.linkedin.com/in/olivia-h-burton/" style="${link}">LinkedIn</a> (mention Moodboard Museum if we don't know each other yet!).`,
+    },
+  ];
 
   return (
-    <div className="about-page">
-      <Link to="/explore" className="about-page__back">← Back to explore</Link>
+    <main className="about-page">
+      <div className="about-hero">
+        <h1>About Moodboard Museum</h1>
+        <p className="about-hero__byline">Curated by Olivia Burton</p>
+      </div>
 
-      <h1 className="about-heading">About Moodboard Museum</h1>
+      <blockquote className="about-quote">
+        AI shows you what the internet <em>thinks</em> cottagecore looks like.
+        Moodboard Museum shows you where cottagecore <em>came from.</em>
+      </blockquote>
 
-      <section className="about-section">
-        <h2 className="about-section__heading">What it is</h2>
-        <p className="about-section__body">
-          Moodboard Museum is a search tool for CC0 art from the world's great museums, organized by aesthetic rather than period or medium. Search an aesthetic (dark academia, cottagecore, girlboss…) and find real, human-made art that fits the vibe.
-        </p>
-      </section>
+      {sections.map(({ mark, title, body }) => (
+        <div key={mark} className="about-section">
+          <div className="about-section__head">
+            <span className="mm-smallcaps mm-smallcaps--accent">§ {mark}</span>
+            <h2>{title}</h2>
+          </div>
+          <p dangerouslySetInnerHTML={{ __html: body }} />
+        </div>
+      ))}
 
-      <section className="about-section">
-        <h2 className="about-section__heading">Why we built it</h2>
-        <p className="about-section__body">
-          Why create more "AI slop" when there are thousands of real, human-made artworks at your fingertips? The world's museums have spent centuries collecting and preserving human-made art, and much of it is now freely available under CC0 licenses. Moodboard Museum makes that collection discoverable by aesthetic, so your next moodboard, mood reference, or creative project is built from real art — not generated images.
-        </p>
-      </section>
-
-      <section className="about-section">
-        <h2 className="about-section__heading">Who it's for</h2>
-        <p className="about-section__body">
-          Designers, students, curators, artists, writers, museumgoers, gallery hoppers, creatives, creators, builders, historians, explorers, and curious people.
-        </p>
-      </section>
-
-      <section className="about-section">
-        <h2 className="about-section__heading">How it works</h2>
-        <p className="about-section__body">
-          When you search an aesthetic, Moodboard Museum uses AI to translate your search into a set of filters — medium, period, subject tags — and queries a database of <strong>{count}</strong> objects from open access collections. Results are ranked by relevance to the aesthetic. You can add images to a moodboard, rearrange them, and download the result as a PNG with full attribution. If you want to learn more about an image, you can click through to the museum's website. Because results are based on database tags, searches are imperfect — but that's part of what makes them interesting.
-        </p>
-      </section>
-
-      <section className="about-section">
-        <h2 className="about-section__heading">The images</h2>
-        <p className="about-section__body">
-          All images are Creative Commons Zero (CC0). We include attribution anyway because artists deserve credit, and because knowing who made something is part of understanding it.
-        </p>
-      </section>
-
-      <section className="about-section">
-        <h2 className="about-section__heading">Pardon our dust</h2>
-        <p className="about-section__body">
-          The Met is just the beginning. We're working on adding collections from the Art Institute of Chicago, the Rijksmuseum, the Smithsonian, and others. If you'd like to suggest a museum or contribute to the project, visit us on{' '}
-          <a
-            href="https://github.com/livieburton/moodboard-museum"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="about-link"
-          >
-            GitHub
-          </a>
-          .
-        </p>
-      </section>
-    </div>
+      <div className="about-footer-rule">
+        <span className="mm-smallcaps mm-smallcaps--wide">— End —</span>
+      </div>
+    </main>
   );
 }

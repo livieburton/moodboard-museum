@@ -6,21 +6,19 @@ import { listThemes, queryTheme, searchFreeText, searchByColor } from '../api';
 
 const COLOR_DEBOUNCE_MS = 400;
 
-// Rainbow order: dark warm → red → orange → yellow → green → blue → purple → pink → light
 const CURATED_COLORS = [
   { label: 'Espresso',        hex: '#4B2F27' },
   { label: 'Burgundy',        hex: '#800020' },
   { label: 'Terracotta',      hex: '#E2725B' },
-  { label: 'Tomato',          hex: '#FF6347' },
-  { label: 'Gen Z Yellow',    hex: '#FFE227' },
+  { label: 'Marigold',        hex: '#FFC83D' },
   { label: 'Matcha',          hex: '#93B85A' },
-  { label: 'Emerald Green',   hex: '#00674f' },
+  { label: 'Emerald',         hex: '#00674F' },
   { label: 'Turquoise',       hex: '#40E0D0' },
   { label: 'Cobalt',          hex: '#0047AB' },
   { label: 'Eggplant',        hex: '#614051' },
   { label: 'Lavender',        hex: '#B57EDC' },
   { label: 'Millennial Pink', hex: '#F4C2C2' },
-  { label: 'Cream',           hex: '#FFFDD0' },
+  { label: 'Cream',           hex: '#F5EBD8' },
 ];
 
 function getTextColor(hex) {
@@ -46,6 +44,7 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
   const [hexInput, setHexInput] = useState('');
   const [hexError, setHexError] = useState(false);
+  const [displayCount, setDisplayCount] = useState(48);
   const inputRef = useRef(null);
   const nativeColorRef = useRef(null);
   const searchInFlight = useRef(false);
@@ -66,6 +65,7 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
     setLoading(true);
     setError(null);
     setResults(null);
+    setDisplayCount(48);
     try {
       const data = await queryTheme(slug);
       setResults(data.results);
@@ -77,9 +77,9 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
     }
   }
 
-  async function handleSearch(e) {
-    e.preventDefault();
-    const q = searchInput.trim();
+  async function handleSearch(e, directQuery) {
+    if (e && e.preventDefault) e.preventDefault();
+    const q = (directQuery !== undefined ? directQuery : searchInput).trim();
     if (!q || loading || searchInFlight.current) return;
     searchInFlight.current = true;
     if (onTitleChange) onTitleChange(q);
@@ -89,6 +89,7 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
     setResults(null);
     setMatchReason('');
     setResultColorHex(null);
+    setDisplayCount(48);
     try {
       const data = await searchFreeText(q);
       setResults(data.results);
@@ -110,6 +111,7 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
     setError(null);
     setResults(null);
     setMatchReason('');
+    setDisplayCount(48);
     try {
       const data = await searchByColor(hex);
       setResults(data.results);
@@ -186,6 +188,18 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
     }
   }
 
+  function handleClear() {
+    setResults(null);
+    setMatchReason('');
+    setError(null);
+    setActiveSlug(null);
+    setResultColorHex(null);
+    setSearchInput('');
+    setColorTextInput('');
+    setActiveCuratedHex(null);
+    setDisplayCount(48);
+  }
+
   function handleToggleColorMode() {
     const next = !colorMode;
     setColorMode(next);
@@ -223,10 +237,12 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
       </div>
 
       {!colorMode ? (
-        <form className="search-form" onSubmit={handleSearch}>
+        <form className="search-row" onSubmit={handleSearch}>
+          <span className="search-row__label">Search</span>
+          <div className="search-row__divider" aria-hidden="true" />
           <input
             ref={inputRef}
-            className="search-input"
+            className="search-row__input"
             type="text"
             placeholder="Rainy day, Hamlet, summer picnic, cozy interiors, big city, steampunk, art nouveau..."
             value={searchInput}
@@ -234,15 +250,17 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
             maxLength={200}
             disabled={loading}
           />
-          <button className="search-button" type="submit" disabled={loading} aria-label={loading && !activeSlug ? 'Searching' : 'Search'}>
+          <button className="search-row__button" type="submit" disabled={loading} aria-label={loading && !activeSlug ? 'Searching' : 'Search'}>
             {loading && !activeSlug ? 'Searching…' : 'Search'}
           </button>
         </form>
       ) : (
         <div className="color-search-section">
-          <form className="search-form" onSubmit={handleColorTextSearch}>
+          <form className="search-row" onSubmit={handleColorTextSearch}>
+            <span className="search-row__label">Search</span>
+            <div className="search-row__divider" aria-hidden="true" />
             <input
-              className="search-input"
+              className="search-row__input"
               type="text"
               placeholder="Marigold, charcoal, lavender, taupe, chartreuse, periwinkle…"
               value={colorTextInput}
@@ -250,25 +268,25 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
               maxLength={100}
               disabled={loading}
             />
-            <button className="search-button" type="submit" disabled={loading} aria-label="Search by color name">
+            <button className="search-row__button" type="submit" disabled={loading} aria-label="Search by color name">
               {loading ? 'Searching…' : 'Search'}
             </button>
           </form>
-          <div className="color-pill-picker">
-            {CURATED_COLORS.map(({ label, hex, bg }) => (
+          <div className="color-swatches">
+            {CURATED_COLORS.map(({ label, hex }) => (
               <button
-                key={label}
-                className={`color-pill${activeCuratedHex === hex ? ' active' : ''}`}
-                style={{ '--pill-color': hex, '--pill-text': getTextColor(hex) }}
+                key={hex}
+                className={`color-swatch${activeCuratedHex === hex ? ' is-active' : ''}`}
                 onClick={() => handleCuratedColorClick(hex, label)}
                 title={label}
               >
-                <span className="color-pill__dot" style={{ background: bg || hex }} />
-                {label}
+                <span className="color-swatch__disc" style={{ background: hex }} />
+                <span className="color-swatch__label">{label}</span>
               </button>
             ))}
-            <button className="color-picker-toggle" onClick={() => setColorPickerOpen(!colorPickerOpen)}>
-              + custom color
+            <button className="color-swatch color-swatch--custom" onClick={() => setColorPickerOpen(!colorPickerOpen)}>
+              <span className="color-swatch__disc color-swatch__disc--rainbow" />
+              <span className="mm-smallcaps">Custom</span>
             </button>
           </div>
           {colorPickerOpen && (
@@ -312,48 +330,109 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
         </div>
       )}
 
-      {!colorMode && <ThemePicker themes={themes} activeSlug={activeSlug} onSelect={handleSelectTheme} />}
+      {(results !== null || error) && !loading && (
+        <button className="clear-search" onClick={handleClear}>
+          ← Browse curated collections
+        </button>
+      )}
 
-      {loading && <p className="state-message">Loading…</p>}
+      {loading && (
+        <>
+          <div className="loading-bar">
+            <span className="loading-bar__pulse" />
+            <span className="mm-smallcaps mm-smallcaps--accent">Reading the archive…</span>
+            <p className="loading-bar__sub">translating your aesthetic into filters — classifications, tags, date ranges.</p>
+          </div>
+          <div className="results-grid">
+            {[0.7, 1.1, 0.85, 0.9, 1.2, 0.75, 1.0, 0.95, 0.7, 1.15, 0.8, 0.9].map((r, i) => (
+              <div key={i} className="artwork-card artwork-card--skeleton">
+                <div className="mm-shimmer" style={{ aspectRatio: `1/${r}` }} />
+                <div className="artwork-card__rule" />
+                <div className="artwork-card__body">
+                  <div className="mm-shimmer mm-shimmer--text" style={{ width: '78%' }} />
+                  <div className="mm-shimmer mm-shimmer--text" style={{ width: '52%', marginTop: 10, height: 9 }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       {error && <p className="state-message error">Something went wrong: {error}</p>}
 
       {!loading && results !== null && (
         <>
           {matchReason && (
-            <p className="match-reason-bar">
+            <div className="match-reason">
               {resultColorHex && (
                 <span
                   className="match-reason-swatch"
-                  style={{ background: resultColorHex }}
+                  style={{ background: resultColorHex, width: 18, height: 18, borderRadius: '50%', border: '1px solid rgba(0,0,0,0.1)', display: 'inline-block', flexShrink: 0 }}
                   aria-hidden="true"
                 />
               )}
-              {matchReason}
-            </p>
+              <span className="mm-smallcaps mm-smallcaps--wide mm-smallcaps--accent">Matched on ·</span>
+              <p className="match-reason__text">{matchReason}</p>
+              <span className="match-reason__count">{results.length} artworks</span>
+            </div>
           )}
           {results.length === 0 ? (
-            <p className="state-message">
-              No matching artworks with images yet — check back as the collection grows.
-            </p>
-          ) : (
-            <div className="results-grid">
-              {results.map((artwork) => (
-                <ArtworkCard
-                    key={artwork.object_id}
-                    artwork={artwork}
-                    onAdd={onAddToMoodboard}
-                    isAdded={moodboard.some((a) => a.object_id === artwork.object_id)}
-                  />
-              ))}
+            <div className="empty-state">
+              <div className="empty-state__mark">—</div>
+              <h2 className="empty-state__title">No artworks match yet.</h2>
+              <p className="empty-state__body">
+                The archive is wide but not infinite. Try a softer word, an era, or a feeling —
+                <em> "autumnal," "moonlit," "overgrown."</em>
+              </p>
+              <div className="empty-state__chips">
+                {['autumnal', 'moonlit', 'overgrown', 'candlelit'].map((s) => (
+                  <button key={s} className="empty-chip" onClick={() => { setSearchInput(s); handleSearch(null, s); }}>
+                    "{s}"
+                  </button>
+                ))}
+              </div>
             </div>
+          ) : (
+            <>
+              <div className="results-grid">
+                {results.slice(0, displayCount).map((artwork) => (
+                  <ArtworkCard
+                      key={artwork.object_id}
+                      artwork={artwork}
+                      onAdd={onAddToMoodboard}
+                      isAdded={moodboard.some((a) => a.object_id === artwork.object_id)}
+                    />
+                ))}
+              </div>
+              {displayCount < results.length && (
+                <div className="show-more">
+                  <button className="show-more__btn" onClick={() => setDisplayCount((n) => n + 48)}>
+                    Show more — {results.length - displayCount} remaining
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </>
       )}
 
-      {!loading && results === null && !error && (
-        <div className="idle-state">
-          <p className="state-message state-message--idle">Search an aesthetic. Build a moodboard. Get inspired.</p>
+      {!loading && results === null && !error && !colorMode && (
+        <div className="explore-idle">
+          <div className="explore-idle__rail">
+            <span className="mm-smallcaps mm-smallcaps--wide mm-smallcaps--accent">§ I  ·  Begin</span>
+            <h2 className="explore-idle__heading">
+              Search an <em>aesthetic.</em>
+            </h2>
+            <p className="explore-idle__sub">
+              Type any mood, era, or vibe. Or pick a curated collection.
+            </p>
+          </div>
+          {!colorMode && (
+            <div className="explore-idle__main">
+              <span className="mm-smallcaps">Curated collections</span>
+              <ThemePicker themes={themes} activeSlug={activeSlug} onSelect={handleSelectTheme} />
+            </div>
+          )}
         </div>
       )}
     </main>

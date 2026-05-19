@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
-export default function ExploreBanner() {
+export default function ExploreBanner({ moodboard = [], onOpenMoodboard }) {
   const [images, setImages] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const loadCountRef = useRef(0);
@@ -39,9 +39,12 @@ export default function ExploreBanner() {
         ))}
       </div>
       <div className="explore-banner__overlay" />
-      <Link to="/" className="explore-banner__card">
-        <img src="/logo1.svg" alt="Moodboard Museum" className="explore-banner__logo" />
-      </Link>
+      <div className="explore-banner__row">
+        <Link to="/" className="explore-banner__brand">
+          <img src="/logo1.svg" alt="Moodboard Museum" />
+        </Link>
+        <Link to="/about" className="explore-banner__about">About</Link>
+      </div>
     </div>
   );
 }

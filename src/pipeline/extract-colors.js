@@ -252,7 +252,10 @@ async function processObject(objectId, imageUrl) {
     imgBuffer = await fetchBuffer(url);
   } catch (err) {
     console.log(`  [skip] fetch failed for ${objectId}: ${err.message}`);
-    return false;
+    // 404s are permanent — mark with a sentinel so we never retry.
+    // DNS/network errors are transient — leave unwritten so we retry next run.
+    const isPermanent = err.message.includes('HTTP 404') || err.message.includes('HTTP 403') || err.message.includes('HTTP 410');
+    return isPermanent ? 'permanent' : false;
   }
 
   let pixels, total;
@@ -317,12 +320,17 @@ async function main() {
     const imgUrl = row.primary_image_small || row.primary_image;
     process.stdout.write(`[${i + 1}/${total}] object_id=${row.object_id} … `);
 
-    const ok = await processObject(row.object_id, imgUrl);
-    if (ok) {
+    const result = await processObject(row.object_id, imgUrl);
+    if (result === true) {
       processed++;
       console.log('done');
     } else {
       skipped++;
+      if (result === 'permanent') {
+        // Write a weight=0 sentinel so this object is never retried.
+        stmtDelete.run(row.object_id);
+        stmtInsert.run(row.object_id, 0, 0, 0, 0, '#000000');
+      }
     }
 
     if (i < rows.length - 1 && !stopping) await sleep(DELAY_MS);

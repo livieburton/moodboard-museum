@@ -70,14 +70,22 @@ function AppShell() {
           path="/explore"
           element={
             <>
-              <ExploreBanner />
+              <ExploreBanner moodboard={moodboard} onOpenMoodboard={() => setPanelOpen(true)} />
               <SearchView
                 onAddToMoodboard={handleAdd}
                 moodboard={moodboard}
                 onTitleChange={setPanelTitle}
               />
               <footer className="app-footer">
-                Moodboard Museum is designed for aesthetic inspiration, not historical research. Search terms may result in inappropriate or irrelevant images. For more on this project, visit the <Link to="/about" className="app-footer__link">About page</Link>. For more context on the art, follow image links to museum websites directly.
+                <span className="mm-smallcaps mm-smallcaps--wide mm-smallcaps--accent">
+                  — A note from the curators —
+                </span>
+                <p>
+                  Moodboard Museum is designed for aesthetic inspiration, not historical research.
+                  Search terms may result in inappropriate or irrelevant images. For more on this project,
+                  visit the <Link to="/about" className="app-footer__link">About page</Link>. For more
+                  context on the art, follow image links to museum websites directly.
+                </p>
               </footer>
             </>
           }
@@ -101,6 +109,7 @@ function AppShell() {
           </Link>
         </div>
       )}
+
 
       <MoodboardPanel
         artworks={moodboard}
