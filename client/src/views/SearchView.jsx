@@ -11,12 +11,14 @@ const CURATED_COLORS = [
   { label: 'Espresso',        hex: '#4B2F27' },
   { label: 'Burgundy',        hex: '#800020' },
   { label: 'Terracotta',      hex: '#E2725B' },
+  { label: 'Tomato',          hex: '#FF6347' },
   { label: 'Gen Z Yellow',    hex: '#FFE227' },
   { label: 'Matcha',          hex: '#93B85A' },
   { label: 'Emerald Green',   hex: '#00674f' },
   { label: 'Turquoise',       hex: '#40E0D0' },
   { label: 'Cobalt',          hex: '#0047AB' },
   { label: 'Eggplant',        hex: '#614051' },
+  { label: 'Lavender',        hex: '#B57EDC' },
   { label: 'Millennial Pink', hex: '#F4C2C2' },
   { label: 'Cream',           hex: '#FFFDD0' },
 ];
@@ -41,8 +43,11 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
   const [colorTextInput, setColorTextInput] = useState('');
   const [activeCuratedHex, setActiveCuratedHex] = useState(null);
   const [resultColorHex, setResultColorHex] = useState(null);
+  const [colorPickerOpen, setColorPickerOpen] = useState(false);
+  const [hexInput, setHexInput] = useState('');
+  const [hexError, setHexError] = useState(false);
   const inputRef = useRef(null);
-  const colorInputRef = useRef(null);
+  const nativeColorRef = useRef(null);
   const searchInFlight = useRef(false);
   const colorDebounceRef = useRef(null);
   const colorSearchInFlight = useRef(false);
@@ -151,16 +156,35 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
     setActiveCuratedHex(hex);
     setPickedColor(hex);
     setColorTextInput('');
+    setColorPickerOpen(false);
+    setHexInput('');
+    setHexError(false);
     await runColorSearch(hex, label);
   }
 
-  function handleColorChange(e) {
+  function handleNativeColorChange(e) {
     const hex = e.target.value;
+    setHexInput(hex);
+    setHexError(false);
     setPickedColor(hex);
-    setColorTextInput('');
     setActiveCuratedHex(null);
     clearTimeout(colorDebounceRef.current);
     colorDebounceRef.current = setTimeout(() => runColorSearch(hex), COLOR_DEBOUNCE_MS);
+  }
+
+  function handleHexInput(e) {
+    const raw = e.target.value;
+    setHexInput(raw);
+    const normalized = raw.startsWith('#') ? raw : `#${raw}`;
+    if (/^#[0-9A-Fa-f]{6}$/.test(normalized)) {
+      setHexError(false);
+      setPickedColor(normalized);
+      setActiveCuratedHex(null);
+      clearTimeout(colorDebounceRef.current);
+      colorDebounceRef.current = setTimeout(() => runColorSearch(normalized), COLOR_DEBOUNCE_MS);
+    } else {
+      setHexError(raw.length > 0);
+    }
   }
 
   function handleToggleColorMode() {
@@ -173,9 +197,9 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
     setResultColorHex(null);
     setColorTextInput('');
     setActiveCuratedHex(null);
-    if (next) {
-      setTimeout(() => colorInputRef.current?.focus(), 50);
-    }
+    setColorPickerOpen(false);
+    setHexInput('');
+    setHexError(false);
   }
 
   return (
@@ -219,16 +243,15 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
         <div className="color-search-section">
           <form className="search-form" onSubmit={handleColorTextSearch}>
             <input
-              ref={colorInputRef}
               className="search-input"
               type="text"
-              placeholder="Tomato red, marigold, charcoal, lavender, taupe, chartreuse, periwinkle…"
+              placeholder="Marigold, charcoal, lavender, taupe, chartreuse, periwinkle…"
               value={colorTextInput}
               onChange={(e) => setColorTextInput(e.target.value)}
               maxLength={100}
               disabled={loading}
             />
-            <button className="search-button" type="submit" disabled={loading || !colorTextInput.trim()} aria-label="Search by color name">
+            <button className="search-button" type="submit" disabled={loading} aria-label="Search by color name">
               {loading ? 'Searching…' : 'Search'}
             </button>
           </form>
@@ -237,27 +260,56 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
               <button
                 key={label}
                 className={`color-pill${activeCuratedHex === hex ? ' active' : ''}`}
-                style={{ background: bg || hex, color: getTextColor(hex) }}
+                style={{ '--pill-color': hex, '--pill-text': getTextColor(hex) }}
                 onClick={() => handleCuratedColorClick(hex, label)}
                 title={label}
               >
+                <span className="color-pill__dot" style={{ background: bg || hex }} />
                 {label}
               </button>
             ))}
+            <button className="color-picker-toggle" onClick={() => setColorPickerOpen(!colorPickerOpen)}>
+              + custom color
+            </button>
           </div>
-          <div className="color-picker-row">
-            <span className="color-picker-label">Or pick a color:</span>
-            <input
-              id="color-picker"
-              className="color-picker-input"
-              type="color"
-              value={pickedColor}
-              onChange={handleColorChange}
-              disabled={loading}
-              aria-label="Pick a color to search artworks"
-            />
-            <span className="color-picker-hex">{pickedColor.toUpperCase()}</span>
-          </div>
+          {colorPickerOpen && (
+            <div className="color-picker-inline">
+              <div className="color-picker-swatch-wrapper">
+                <div
+                  className="color-picker-swatch"
+                  style={{ background: hexInput === '' ? '#B5A48C' : pickedColor }}
+                />
+                <input
+                  ref={nativeColorRef}
+                  type="color"
+                  className="color-picker-native"
+                  value={hexInput === '' ? '#B5A48C' : pickedColor}
+                  onChange={handleNativeColorChange}
+                  disabled={loading}
+                  aria-label="Pick a color"
+                  title="Click to open color picker or eyedropper"
+                />
+              </div>
+              <input
+                type="text"
+                className={`color-picker-hex-input${hexError ? ' error' : ''}`}
+                placeholder="#B5A48C"
+                value={hexInput}
+                onChange={handleHexInput}
+                maxLength={7}
+                spellCheck={false}
+                autoFocus
+                disabled={loading}
+              />
+              <button
+                className="color-picker-cancel"
+                onClick={() => { setColorPickerOpen(false); setHexInput(''); setHexError(false); }}
+                aria-label="Close color picker"
+              >
+                ×
+              </button>
+            </div>
+          )}
         </div>
       )}
 
