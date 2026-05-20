@@ -3,14 +3,19 @@ import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 're
 import HeroPage from './pages/HeroPage';
 import SearchView from './views/SearchView';
 import AboutPage from './pages/AboutPage';
+import SavedPage from './pages/SavedPage';
 import MoodboardPanel from './components/MoodboardPanel';
+import MobileTabBar from './components/MobileTabBar';
 import ExploreBanner from './components/ExploreBanner';
+import useIsMobile from './hooks/useIsMobile';
 
 function AppShell() {
   const location = useLocation();
   const navigate = useNavigate();
   const isExplore = location.pathname === '/explore';
   const isAbout = location.pathname === '/about';
+  const isMobile = useIsMobile();
+
   const [moodboard, setMoodboard] = useState([]);
   const [panelOpen, setPanelOpen] = useState(false);
   const [panelTitle, setPanelTitle] = useState('My Moodboard');
@@ -23,7 +28,6 @@ function AppShell() {
 
   useEffect(() => {
     function onScroll() {
-      // On explore, header appears after the banner scrolls away (~320px)
       const threshold = isExplore ? 320 : window.innerHeight * 0.85;
       setScrolled(window.scrollY > threshold);
     }
@@ -47,8 +51,20 @@ function AppShell() {
     setMoodboard(newOrder);
   }
 
+  const isHero = location.pathname === '/';
+
   return (
     <div className="app">
+      {/* Mobile logo bar — all pages except hero */}
+      {isMobile && !isHero && (
+        <header className="mobile-header">
+          <Link to="/" className="mobile-header__link">
+            <img src="/logo2.svg" alt="Moodboard Museum" className="mobile-header__logo" />
+          </Link>
+        </header>
+      )}
+
+      {/* Sticky header — desktop only (hidden on mobile via CSS) */}
       <header className={`app-header${showHeader ? ' app-header--visible' : ''}`}>
         <div className="app-header__inner">
           <div className="app-header__side" />
@@ -66,6 +82,18 @@ function AppShell() {
       <Routes>
         <Route path="/" element={<HeroPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route
+          path="/saved"
+          element={
+            <SavedPage
+              moodboard={moodboard}
+              onRemove={handleRemove}
+              onReorder={handleReorder}
+              panelTitle={panelTitle}
+              onTitleChange={setPanelTitle}
+            />
+          }
+        />
         <Route
           path="/explore"
           element={
@@ -92,7 +120,8 @@ function AppShell() {
         />
       </Routes>
 
-      {isExplore && !panelOpen && (
+      {/* FAB stack — desktop only */}
+      {!isMobile && isExplore && !panelOpen && (
         <div className="fab-stack">
           <button
             className="fab-moodboard-btn"
@@ -110,16 +139,21 @@ function AppShell() {
         </div>
       )}
 
+      {/* Moodboard slide-out panel — desktop only */}
+      {!isMobile && (
+        <MoodboardPanel
+          artworks={moodboard}
+          onRemove={handleRemove}
+          onReorder={handleReorder}
+          onClose={() => setPanelOpen(false)}
+          isOpen={panelOpen}
+          title={panelTitle}
+          onTitleChange={setPanelTitle}
+        />
+      )}
 
-      <MoodboardPanel
-        artworks={moodboard}
-        onRemove={handleRemove}
-        onReorder={handleReorder}
-        onClose={() => setPanelOpen(false)}
-        isOpen={panelOpen}
-        title={panelTitle}
-        onTitleChange={setPanelTitle}
-      />
+      {/* Bottom tab bar — mobile only */}
+      {isMobile && <MobileTabBar savedCount={moodboard.length} />}
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import ThemePicker from '../components/ThemePicker';
 import ArtworkCard from '../components/ArtworkCard';
 import { listThemes, queryTheme, searchFreeText, searchByColor } from '../api';
+import useIsMobile from '../hooks/useIsMobile';
 
 const COLOR_DEBOUNCE_MS = 400;
 
@@ -21,6 +22,12 @@ const CURATED_COLORS = [
   { label: 'Cream',           hex: '#F5EBD8' },
 ];
 
+const IN_THE_AIR = [
+  { slug: 'cottagecore',   label: 'Cottagecore',   sub: 'Pastoral calm — landscapes, flowers, rural life.' },
+  { slug: 'dark-academia', label: 'Dark Academia',  sub: 'Moody scholarship — old portraits, books, shadowed interiors.' },
+  { slug: 'witchy',        label: 'Witchy',         sub: 'Candles, herbs, moons, and the occult.' },
+];
+
 function getTextColor(hex) {
   const r = parseInt(hex.slice(1, 3), 16);
   const g = parseInt(hex.slice(3, 5), 16);
@@ -29,6 +36,9 @@ function getTextColor(hex) {
 }
 
 export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleChange }) {
+  const isMobile = useIsMobile();
+  const navigate = useNavigate();
+
   const [themes, setThemes] = useState([]);
   const [activeSlug, setActiveSlug] = useState(null);
   const [results, setResults] = useState(null);
@@ -45,6 +55,8 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
   const [hexInput, setHexInput] = useState('');
   const [hexError, setHexError] = useState(false);
   const [displayCount, setDisplayCount] = useState(48);
+  const [inTheAirArtworks, setInTheAirArtworks] = useState([]);
+
   const inputRef = useRef(null);
   const nativeColorRef = useRef(null);
   const searchInFlight = useRef(false);
@@ -55,6 +67,14 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
     listThemes()
       .then(setThemes)
       .catch((err) => console.error('Failed to load themes:', err));
+  }, []);
+
+  // Fetch sample artworks for "In the air" mini-mosaics
+  useEffect(() => {
+    fetch('/api/random?limit=9')
+      .then((r) => r.json())
+      .then((data) => setInTheAirArtworks(data.results || []))
+      .catch(() => {});
   }, []);
 
   async function handleSelectTheme(slug) {
@@ -215,127 +235,153 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
     setHexError(false);
   }
 
+  // Split random artworks into 3 groups for "In the air" mosaics
+  const inTheAirGroups = IN_THE_AIR.map((_, i) =>
+    inTheAirArtworks.slice(i * 3, i * 3 + 3)
+  );
+
+  const isIdle = !loading && results === null && !error;
+
   return (
     <main className="search-view" id="search">
-      <div className="search-top-bar">
-        <div className="search-mode-toggle">
-          <button
-            className={`search-mode-btn${!colorMode ? ' active' : ''}`}
-            onClick={() => colorMode && handleToggleColorMode()}
-            aria-pressed={!colorMode}
-          >
-            Search by keyword
-          </button>
-          <button
-            className={`search-mode-btn${colorMode ? ' active' : ''}`}
-            onClick={() => !colorMode && handleToggleColorMode()}
-            aria-pressed={colorMode}
-          >
-            Search by color
-          </button>
-        </div>
-      </div>
 
-      {!colorMode ? (
-        <form className="search-row" onSubmit={handleSearch}>
-          <span className="search-row__label">Search</span>
-          <div className="search-row__divider" aria-hidden="true" />
-          <input
-            ref={inputRef}
-            className="search-row__input"
-            type="text"
-            placeholder="Rainy day, Hamlet, summer picnic, cozy interiors, big city, steampunk, art nouveau..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            maxLength={200}
-            disabled={loading}
-          />
-          <button className="search-row__button" type="submit" disabled={loading} aria-label={loading && !activeSlug ? 'Searching' : 'Search'}>
-            {loading && !activeSlug ? 'Searching…' : 'Search'}
+      {/* ── Mobile results header (back + query chip) ── */}
+      {isMobile && results !== null && !loading && (
+        <div className="mobile-results-bar">
+          <button className="mobile-results-bar__back" onClick={handleClear} aria-label="Back">
+            ←
           </button>
-        </form>
-      ) : (
-        <div className="color-search-section">
-          <form className="search-row" onSubmit={handleColorTextSearch}>
-            <span className="search-row__label">Search</span>
-            <div className="search-row__divider" aria-hidden="true" />
-            <input
-              className="search-row__input"
-              type="text"
-              placeholder="Marigold, charcoal, lavender, taupe, chartreuse, periwinkle…"
-              value={colorTextInput}
-              onChange={(e) => setColorTextInput(e.target.value)}
-              maxLength={100}
-              disabled={loading}
-            />
-            <button className="search-row__button" type="submit" disabled={loading} aria-label="Search by color name">
-              {loading ? 'Searching…' : 'Search'}
-            </button>
-          </form>
-          <div className="color-swatches">
-            {CURATED_COLORS.map(({ label, hex }) => (
-              <button
-                key={hex}
-                className={`color-swatch${activeCuratedHex === hex ? ' is-active' : ''}`}
-                onClick={() => handleCuratedColorClick(hex, label)}
-                title={label}
-              >
-                <span className="color-swatch__disc" style={{ background: hex }} />
-                <span className="color-swatch__label">{label}</span>
-              </button>
-            ))}
-            <button className="color-swatch color-swatch--custom" onClick={() => setColorPickerOpen(!colorPickerOpen)}>
-              <span className="color-swatch__disc color-swatch__disc--rainbow" />
-              <span className="mm-smallcaps">Custom</span>
-            </button>
+          <div className="mobile-results-bar__chip">
+            <span className="mobile-results-bar__icon">⌕</span>
+            <span className="mobile-results-bar__query">
+              {activeSlug ? themes.find((t) => t.slug === activeSlug)?.label : searchInput || colorTextInput || activeCuratedHex}
+            </span>
+            <button className="mobile-results-bar__clear" onClick={handleClear} aria-label="Clear search">×</button>
           </div>
-          {colorPickerOpen && (
-            <div className="color-picker-inline">
-              <div className="color-picker-swatch-wrapper">
-                <div
-                  className="color-picker-swatch"
-                  style={{ background: hexInput === '' ? '#B5A48C' : pickedColor }}
-                />
-                <input
-                  ref={nativeColorRef}
-                  type="color"
-                  className="color-picker-native"
-                  value={hexInput === '' ? '#B5A48C' : pickedColor}
-                  onChange={handleNativeColorChange}
-                  disabled={loading}
-                  aria-label="Pick a color"
-                  title="Click to open color picker or eyedropper"
-                />
-              </div>
-              <input
-                type="text"
-                className={`color-picker-hex-input${hexError ? ' error' : ''}`}
-                placeholder="#B5A48C"
-                value={hexInput}
-                onChange={handleHexInput}
-                maxLength={7}
-                spellCheck={false}
-                autoFocus
-                disabled={loading}
-              />
-              <button
-                className="color-picker-cancel"
-                onClick={() => { setColorPickerOpen(false); setHexInput(''); setHexError(false); }}
-                aria-label="Close color picker"
-              >
-                ×
-              </button>
-            </div>
-          )}
         </div>
       )}
 
-      {(results !== null || error) && !loading && (
+      {/* ── Mode toggle + search inputs ── */}
+      {(!isMobile || results === null) && (
+        <>
+          <div className="search-top-bar">
+            <div className="search-mode-toggle">
+              <button
+                className={`search-mode-btn${!colorMode ? ' active' : ''}`}
+                onClick={() => colorMode && handleToggleColorMode()}
+                aria-pressed={!colorMode}
+              >
+                By keyword
+              </button>
+              <button
+                className={`search-mode-btn${colorMode ? ' active' : ''}`}
+                onClick={() => !colorMode && handleToggleColorMode()}
+                aria-pressed={colorMode}
+              >
+                By color
+              </button>
+            </div>
+          </div>
+
+          {!colorMode ? (
+            <form className="search-row" onSubmit={handleSearch}>
+              <input
+                ref={inputRef}
+                className="search-row__input"
+                type="text"
+                placeholder="Rainy day, Hamlet, summer picnic, cozy interiors, big city, steampunk, art nouveau..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                maxLength={200}
+                disabled={loading}
+              />
+              <button className="search-row__button" type="submit" disabled={loading} aria-label={loading && !activeSlug ? 'Searching' : 'Search'}>
+                {loading && !activeSlug ? 'Searching…' : 'Search'}
+              </button>
+            </form>
+          ) : (
+            <div className="color-search-section">
+              <form className="search-row" onSubmit={handleColorTextSearch}>
+                <input
+                  className="search-row__input"
+                  type="text"
+                  placeholder="Marigold, charcoal, lavender, taupe, chartreuse, periwinkle…"
+                  value={colorTextInput}
+                  onChange={(e) => setColorTextInput(e.target.value)}
+                  maxLength={100}
+                  disabled={loading}
+                />
+                <button className="search-row__button" type="submit" disabled={loading} aria-label="Search by color name">
+                  {loading ? 'Searching…' : 'Search'}
+                </button>
+              </form>
+              <div className="color-swatches">
+                {CURATED_COLORS.map(({ label, hex }) => (
+                  <button
+                    key={hex}
+                    className={`color-swatch${activeCuratedHex === hex ? ' is-active' : ''}`}
+                    onClick={() => handleCuratedColorClick(hex, label)}
+                    title={label}
+                  >
+                    <span className="color-swatch__disc" style={{ background: hex }} />
+                    <span className="color-swatch__label">{label}</span>
+                  </button>
+                ))}
+                {/* Custom swatch: disc + inline picker when open */}
+                <div className={`color-swatch-custom-group${colorPickerOpen ? ' is-open' : ''}`}>
+                  <button className="color-swatch color-swatch--custom" onClick={() => setColorPickerOpen(!colorPickerOpen)}>
+                    <span className="color-swatch__disc color-swatch__disc--rainbow" />
+                    <span className="mm-smallcaps">{colorPickerOpen ? '×' : 'Custom'}</span>
+                  </button>
+                  {colorPickerOpen && (
+                    <div className="color-picker-inline">
+                      <div className="color-picker-swatch-wrapper">
+                        <div
+                          className="color-picker-swatch"
+                          style={{ background: hexInput === '' ? '#B5A48C' : pickedColor }}
+                        />
+                        <svg className="color-picker-eyedropper" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M13.5 2.5a2.121 2.121 0 0 1 3 3l-1.5 1.5-3-3 1.5-1.5ZM11 6 4.5 12.5l-.5 3.5 3.5-.5L14 9l-3-3Z" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                          <circle cx="4.5" cy="15.5" r="1" fill="currentColor"/>
+                        </svg>
+                        <input
+                          ref={nativeColorRef}
+                          type="color"
+                          className="color-picker-native"
+                          value={hexInput === '' ? '#B5A48C' : pickedColor}
+                          onChange={handleNativeColorChange}
+                          disabled={loading}
+                          aria-label="Pick a color"
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        className={`color-picker-hex-input${hexError ? ' error' : ''}`}
+                        placeholder="#B5A48C"
+                        value={hexInput}
+                        onChange={handleHexInput}
+                        maxLength={7}
+                        spellCheck={false}
+                        autoFocus
+                        disabled={loading}
+                      />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* ── Desktop clear button ── */}
+      {!isMobile && (results !== null || error) && !loading && (
         <button className="clear-search" onClick={handleClear}>
           ← Browse curated collections
         </button>
       )}
 
+      {/* ── Loading state ── */}
       {loading && (
         <>
           <div className="loading-bar">
@@ -360,6 +406,7 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
 
       {error && <p className="state-message error">Something went wrong: {error}</p>}
 
+      {/* ── Results ── */}
       {!loading && results !== null && (
         <>
           {matchReason && (
@@ -397,11 +444,11 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
               <div className="results-grid">
                 {results.slice(0, displayCount).map((artwork) => (
                   <ArtworkCard
-                      key={artwork.object_id}
-                      artwork={artwork}
-                      onAdd={onAddToMoodboard}
-                      isAdded={moodboard.some((a) => a.object_id === artwork.object_id)}
-                    />
+                    key={artwork.object_id}
+                    artwork={artwork}
+                    onAdd={onAddToMoodboard}
+                    isAdded={moodboard.some((a) => a.object_id === artwork.object_id)}
+                  />
                 ))}
               </div>
               {displayCount < results.length && (
@@ -416,23 +463,62 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
         </>
       )}
 
-      {!loading && results === null && !error && !colorMode && (
+      {/* ── Idle state ── */}
+      {isIdle && !colorMode && (
         <div className="explore-idle">
-          <div className="explore-idle__rail">
-            <span className="mm-smallcaps mm-smallcaps--wide mm-smallcaps--accent">§ I  ·  Begin</span>
-            <h2 className="explore-idle__heading">
-              Search an <em>aesthetic.</em>
-            </h2>
-            <p className="explore-idle__sub">
-              Type any mood, era, or vibe. Or pick a curated collection.
-            </p>
+          <div className="explore-idle__main">
+            <span className="mm-smallcaps">Curated collections</span>
+            <ThemePicker themes={themes} activeSlug={activeSlug} onSelect={handleSelectTheme} />
           </div>
-          {!colorMode && (
-            <div className="explore-idle__main">
-              <span className="mm-smallcaps">Curated collections</span>
-              <ThemePicker themes={themes} activeSlug={activeSlug} onSelect={handleSelectTheme} />
-            </div>
-          )}
+          <div className="explore-idle__tagline">
+            Search an aesthetic. Build a moodboard. Get inspired.
+          </div>
+        </div>
+      )}
+
+      {/* ── Color idle state ── */}
+      {isIdle && colorMode && (
+        <div className="explore-idle explore-idle--color">
+          <div className="explore-idle__tagline">
+            Search a color. Build a moodboard. Get inspired.
+          </div>
+        </div>
+      )}
+
+      {/* ── Mobile idle: curated collections ── */}
+      {isIdle && !colorMode && (
+        <div className="explore-mobile-idle">
+          <div className="explore-mobile-idle__section-head">
+            <span className="mm-smallcaps mm-smallcaps--wide mm-smallcaps--accent">Curated Collections</span>
+          </div>
+          <div className="in-the-air">
+            {IN_THE_AIR.map((item, i) => (
+              <div key={item.slug}>
+                <button
+                  className="in-the-air__row"
+                  onClick={() => handleSelectTheme(item.slug) || handleSearch(null, item.label)}
+                >
+                  <div className="in-the-air__mosaic">
+                    {inTheAirGroups[i].map((artwork, j) => (
+                      <div key={j} className="in-the-air__mosaic-cell">
+                        <img
+                          src={artwork.primary_image_small || artwork.primary_image}
+                          alt=""
+                          className="in-the-air__mosaic-img"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="in-the-air__text">
+                    <div className="in-the-air__label">{item.label}</div>
+                    <p className="in-the-air__sub">{item.sub}</p>
+                  </div>
+                  <span className="in-the-air__arrow">→</span>
+                </button>
+                {i < IN_THE_AIR.length - 1 && <div className="in-the-air__divider" />}
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </main>

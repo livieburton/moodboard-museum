@@ -77,7 +77,8 @@ export default function HeroPage() {
 
       <div className="hero-overlay" />
 
-      <div className="hero-content">
+      {/* Desktop: cream card overlay */}
+      <div className="hero-content hero-content--desktop">
         <div className="hero-card">
           <img src="/logo1.svg" alt="Moodboard Museum" className="hero__logo" />
           <p style={{ whiteSpace: 'pre-line', fontSize: 22, lineHeight: 1.55,
@@ -91,6 +92,22 @@ export default function HeroPage() {
           </p>
           <button className="hero__cta-text" onClick={() => navigate('/explore')}>
             Enter the archive <span aria-hidden>→</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile: small logo card at top, editorial type lower on mosaic */}
+      <div className="hero-content hero-content--mobile">
+        <div className="hero-mobile-logo-card">
+          <img src="/logo1.svg" alt="Moodboard Museum" className="hero-mobile-logo-img" />
+        </div>
+        <div className="hero-mobile-lower">
+          <h1 className="hero-mobile-heading">Get inspired by something human.</h1>
+          <p className="hero-mobile-sub">
+            Every aesthetic has a visual history, and much of it is stored in museums.
+          </p>
+          <button className="hero-mobile-cta" onClick={() => navigate('/explore')}>
+            Enter the archive <span aria-hidden style={{ fontStyle: 'italic', fontFamily: 'serif', fontSize: 16 }}>→</span>
           </button>
         </div>
       </div>
