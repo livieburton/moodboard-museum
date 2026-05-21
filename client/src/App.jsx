@@ -106,7 +106,7 @@ function AppShell() {
               />
               <footer className="app-footer">
                 <span className="mm-smallcaps mm-smallcaps--wide mm-smallcaps--accent">
-                  — A note from the curators —
+                  — A note from the curator —
                 </span>
                 <p>
                   Moodboard Museum is designed for aesthetic inspiration, not historical research.

@@ -24,7 +24,7 @@ router.get('/:slug', async (req, res) => {
   }
 
   try {
-    const result = await queryTheme(recipe);
+    const result = await queryTheme(recipe, { limit: 200 });
 
     // Hard public-domain gate at the API boundary. The DB ingest and query
     // engine already enforce this — this is the third and final check.

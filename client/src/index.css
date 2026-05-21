@@ -539,6 +539,26 @@ body {
   background: var(--surface);
   padding: 14px 18px 14px 22px;
   margin-bottom: 1.5rem;
+  position: relative;
+}
+.search-row__example {
+  position: absolute;
+  left: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--serif-body);
+  font-style: italic;
+  font-size: 18px;
+  color: var(--text-muted);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: calc(100% - 110px);
+}
+.search-row__example--visible {
+  opacity: 1;
 }
 .search-row__label {
   color: var(--text-muted);
@@ -619,7 +639,7 @@ body {
   flex-wrap: nowrap;
   gap: 18px;
   overflow-x: auto;
-  padding-bottom: 6px;
+  padding: 8px 8px;
   margin-bottom: 1.25rem;
 }
 .color-swatch {

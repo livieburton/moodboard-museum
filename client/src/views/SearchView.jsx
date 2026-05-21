@@ -22,6 +22,12 @@ const CURATED_COLORS = [
   { label: 'Cream',           hex: '#F5EBD8' },
 ];
 
+const SEARCH_EXAMPLES = [
+  'Rainy day', 'Summer picnic', 'Hamlet', 'Cozy interiors',
+  'Big city', 'Steampunk', 'Art nouveau', 'Cottagecore',
+  'Dark academia', 'Moonlit', 'Overgrown', 'Autumnal',
+];
+
 const IN_THE_AIR = [
   { slug: 'cottagecore',   label: 'Cottagecore',   sub: 'Pastoral calm — landscapes, flowers, rural life.' },
   { slug: 'dark-academia', label: 'Dark Academia',  sub: 'Moody scholarship — old portraits, books, shadowed interiors.' },
@@ -56,6 +62,8 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
   const [hexError, setHexError] = useState(false);
   const [displayCount, setDisplayCount] = useState(48);
   const [inTheAirArtworks, setInTheAirArtworks] = useState([]);
+  const [exampleIdx, setExampleIdx] = useState(0);
+  const [exampleVisible, setExampleVisible] = useState(true);
 
   const inputRef = useRef(null);
   const nativeColorRef = useRef(null);
@@ -76,6 +84,19 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
       .then((data) => setInTheAirArtworks(data.results || []))
       .catch(() => {});
   }, []);
+
+  // Cycle through placeholder examples on mobile
+  useEffect(() => {
+    if (!isMobile) return;
+    const interval = setInterval(() => {
+      setExampleVisible(false);
+      setTimeout(() => {
+        setExampleIdx((i) => (i + 1) % SEARCH_EXAMPLES.length);
+        setExampleVisible(true);
+      }, 350);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, [isMobile]);
 
   async function handleSelectTheme(slug) {
     const theme = themes.find((t) => t.slug === slug);
@@ -285,11 +306,16 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
 
           {!colorMode ? (
             <form className="search-row" onSubmit={handleSearch}>
+              {isMobile && searchInput === '' && (
+                <span className={`search-row__example${exampleVisible ? ' search-row__example--visible' : ''}`}>
+                  {SEARCH_EXAMPLES[exampleIdx]}
+                </span>
+              )}
               <input
                 ref={inputRef}
                 className="search-row__input"
                 type="text"
-                placeholder="Rainy day, Hamlet, summer picnic, cozy interiors, big city, steampunk, art nouveau..."
+                placeholder={isMobile ? '' : 'Rainy day, Hamlet, summer picnic, cozy interiors, big city, steampunk, art nouveau...'}
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 maxLength={200}
@@ -420,7 +446,13 @@ export default function SearchView({ onAddToMoodboard, moodboard = [], onTitleCh
               )}
               <span className="mm-smallcaps mm-smallcaps--wide mm-smallcaps--accent">Matched on ·</span>
               <p className="match-reason__text">{matchReason}</p>
-              <span className="match-reason__count">{results.length} artworks</span>
+              {!resultColorHex && (
+                <span className="match-reason__count">
+                  {displayCount < results.length
+                    ? `Showing ${displayCount} of ${results.length} artworks`
+                    : `${results.length} artworks`}
+                </span>
+              )}
             </div>
           )}
           {results.length === 0 ? (
