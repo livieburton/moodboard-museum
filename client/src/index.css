@@ -1680,7 +1680,7 @@ body {
   }
 
   /* About page mobile */
-  .about-page { padding: 20px 22px 80px; }
+  .about-page { padding: 8px 22px 80px; }
   .about-hero { margin-bottom: 28px; }
   .about-hero h1 { font-size: 26px; line-height: 1.1; }
   .about-hero__byline { font-size: 14px; margin-top: 6px; }

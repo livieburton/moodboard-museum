@@ -103,9 +103,6 @@ export default function HeroPage() {
         </div>
         <div className="hero-mobile-lower">
           <h1 className="hero-mobile-heading">Get inspired by something human.</h1>
-          <p className="hero-mobile-sub">
-            Every aesthetic has a visual history, and much of it is stored in museums.
-          </p>
           <button className="hero-mobile-cta" onClick={() => navigate('/explore')}>
             Enter the archive <span aria-hidden style={{ fontStyle: 'italic', fontFamily: 'serif', fontSize: 16 }}>→</span>
           </button>

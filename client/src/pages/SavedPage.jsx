@@ -279,7 +279,7 @@ export default function SavedPage({ moodboard = [], onRemove, onReorder, panelTi
           )}
         </div>
         {!isEmpty && (
-          <p className="saved-page__hint">Tap and hold to reorder. Tap an artwork to view on Met.org.</p>
+          <p className="saved-page__hint">Tap and hold to reorder.</p>
         )}
       </div>
 
